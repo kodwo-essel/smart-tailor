@@ -1,19 +1,35 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TypewriterText from './TypewriterText';
+import { authService } from '../services';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign in logic here
-    console.log('Sign in:', formData);
+    setLoading(true);
+    setError('');
+    
+    try {
+      await authService.login({
+        email: formData.email,
+        password: formData.password
+      });
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,6 +65,11 @@ export default function SignIn() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[#1A2A3A] mb-2">Email Address</label>
               <input
@@ -99,10 +120,18 @@ export default function SignIn() {
 
             <button
               type="submit"
-              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors"
+              disabled={loading}
+              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               style={{ fontFamily: '"Russo One", sans-serif' }}
             >
-              Sign In
+              {loading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin text-xl mr-2"></i>
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 

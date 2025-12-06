@@ -1,0 +1,371 @@
+import React, { useState, useEffect } from 'react';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import Loader from './Loader';
+import { authService, userService, User, SubscriptionPlan } from '../services';
+import { useToast } from './ToastContainer';
+
+const Settings: React.FC = () => {
+  const { showToast } = useToast();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Profile');
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [updatingPlan, setUpdatingPlan] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    phoneNumber: '',
+    businessName: '',
+    businessAddress: ''
+  });
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const [userData, plansData] = await Promise.all([
+        userService.getMe(),
+        userService.getSubscriptionPlans()
+      ]);
+      setUser(userData);
+      setPlans(plansData);
+      setFormData({
+        name: userData.name || '',
+        phoneNumber: userData.phoneNumber || '',
+        businessName: userData.businessName || '',
+        businessAddress: userData.businessAddress || ''
+      });
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    
+    setSaving(true);
+    try {
+      await userService.update(user.id, formData);
+      await fetchUser();
+      showToast('Profile updated successfully!', 'success');
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      showToast(error.response?.data?.message || 'Failed to update profile', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const tabs = [
+    { key: 'Profile', icon: 'ri-user-line', label: 'Profile' },
+    { key: 'Business', icon: 'ri-store-line', label: 'Business' },
+    { key: 'Notifications', icon: 'ri-notification-line', label: 'Notifications' },
+    { key: 'Security', icon: 'ri-shield-line', label: 'Security' },
+    { key: 'Billing', icon: 'ri-bank-card-line', label: 'Billing' }
+  ];
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('File size must be less than 2MB', 'warning');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhoto(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openPlanModal = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setShowPlanModal(true);
+  };
+
+  const handlePlanChange = async () => {
+    if (!selectedPlan) return;
+    
+    setUpdatingPlan(true);
+    try {
+      await userService.updateSubscription(selectedPlan.id);
+      const updatedUser = await userService.getMe();
+      setUser(updatedUser);
+      authService.setUser(updatedUser);
+      setShowPlanModal(false);
+      setSelectedPlan(null);
+      showToast('Subscription plan updated successfully!', 'success');
+    } catch (error: any) {
+      console.error('Failed to update plan:', error);
+      showToast(error.response?.data?.message || 'Failed to update plan', 'error');
+    } finally {
+      setUpdatingPlan(false);
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-white">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} currentPage="settings" />
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header 
+          setSidebarOpen={setSidebarOpen} 
+          title="Settings" 
+          subtitle="Manage your account and preferences"
+        />
+        
+        <main className="flex-1 overflow-y-auto p-6 lg:p-12">
+          <div className="max-w-6xl mx-auto">
+            {/* Tab Navigation */}
+            <div className="flex items-center space-x-2 mb-8 overflow-x-auto pb-2">
+              {tabs.map((tab) => (
+                <button 
+                  key={tab.key}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                    activeTab === tab.key 
+                      ? 'bg-[#1A2A3A] text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  <i className={`${tab.icon} text-lg`}></i>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Content */}
+            <div className="space-y-6">
+              {loading ? (
+                <div className="bg-white border border-gray-200 rounded-xl p-8">
+                  <Loader size="md" text="Loading profile..." />
+                </div>
+              ) : activeTab === 'Profile' && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8">
+                  <h2 className="text-xl font-bold text-[#1A2A3A] mb-6">
+                    Profile Information
+                  </h2>
+                  
+                  {/* Profile Photo */}
+                  <div className="flex items-center space-x-6 mb-8">
+                    <div className="relative">
+                      {profilePhoto ? (
+                        <img 
+                          src={profilePhoto} 
+                          alt="Profile" 
+                          className="w-24 h-24 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-24 h-24 flex items-center justify-center bg-gray-200 rounded-full text-3xl font-bold text-gray-700">
+                          {formData.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <input 
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="profile-photo"
+                        onChange={handlePhotoChange}
+                      />
+                      <label 
+                        htmlFor="profile-photo"
+                        className="absolute bottom-0 right-0 w-8 h-8 bg-[#1A2A3A] flex items-center justify-center rounded-full hover:bg-[#2F2F2F] transition-colors cursor-pointer border-2 border-white"
+                      >
+                        <i className="ri-camera-line text-sm text-white"></i>
+                      </label>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-[#1A2A3A] mb-1">Profile Photo</h3>
+                      <p className="text-xs text-gray-500">JPG, PNG or GIF. Max size 2MB</p>
+                    </div>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Full Name</label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Email</label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50"
+                        type="email"
+                        value={user?.email || ''}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Phone</label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        type="tel"
+                        value={formData.phoneNumber}
+                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Business Name</label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        type="text"
+                        value={formData.businessName}
+                        onChange={(e) => handleInputChange('businessName', e.target.value)}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Business Address</label>
+                      <input 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        type="text"
+                        value={formData.businessAddress}
+                        onChange={(e) => handleInputChange('businessAddress', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className="flex justify-end mt-6">
+                    <button 
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="px-6 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {saving ? (
+                        <>
+                          <i className="ri-loader-4-line animate-spin text-lg"></i>
+                          <span>Saving...</span>
+                        </>
+                      ) : (
+                        <span>Save Changes</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'Billing' && user && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8">
+                  <h2 className="text-xl font-bold text-[#1A2A3A] mb-2">Subscription Plan</h2>
+                  <p className="text-sm text-gray-600 mb-6">Manage your subscription and billing</p>
+                  
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {plans.map((plan) => {
+                      const isCurrentPlan = user.subscriptionPlan.id === plan.id;
+                      return (
+                        <div 
+                          key={plan.id}
+                          className={`border-2 rounded-xl p-6 transition-all ${
+                            isCurrentPlan 
+                              ? 'border-[#1A2A3A] bg-[#1A2A3A]/5' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <h3 className="text-lg font-bold text-[#1A2A3A] mb-2">{plan.name}</h3>
+                          <p className="text-sm text-gray-600 mb-4">{plan.description}</p>
+                          <div className="mb-4">
+                            <div className="flex items-center text-sm text-gray-700 mb-2">
+                              <i className={`${plan.appointmentsEnabled ? 'ri-checkbox-circle-line text-green-600' : 'ri-close-circle-line text-red-600'} mr-2`}></i>
+                              Appointments {plan.appointmentsEnabled ? 'Enabled' : 'Disabled'}
+                            </div>
+                          </div>
+                          {isCurrentPlan ? (
+                            <button 
+                              disabled
+                              className="w-full px-4 py-3 bg-gray-200 text-gray-600 text-sm font-medium rounded-lg cursor-not-allowed"
+                            >
+                              Current Plan
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => openPlanModal(plan)}
+                              className="w-full px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
+                            >
+                              Select Plan
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {activeTab !== 'Profile' && activeTab !== 'Billing' && (
+                <div className="bg-white border border-gray-200 rounded-xl p-8">
+                  <div className="text-center py-12">
+                    <i className={`${tabs.find(t => t.key === activeTab)?.icon} text-6xl text-gray-300 mb-4`}></i>
+                    <h3 className="text-xl font-bold text-[#1A2A3A] mb-2">
+                      {activeTab} Settings
+                    </h3>
+                    <p className="text-gray-600">This section is under development.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* Plan Change Confirmation Modal */}
+      {showPlanModal && selectedPlan && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto mb-6">
+              <i className="ri-bank-card-line text-3xl text-blue-600"></i>
+            </div>
+            <h2 className="text-2xl font-bold text-[#1A2A3A] text-center mb-3">Change Subscription Plan</h2>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              Are you sure you want to switch to the <span className="font-semibold text-[#1A2A3A]">{selectedPlan.name}</span> plan?
+            </p>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => {
+                  setShowPlanModal(false);
+                  setSelectedPlan(null);
+                }}
+                disabled={updatingPlan}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handlePlanChange}
+                disabled={updatingPlan}
+                className="flex-1 px-6 py-3 bg-[#1A2A3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
+              >
+                {updatingPlan ? (
+                  <i className="ri-loader-4-line animate-spin text-lg"></i>
+                ) : (
+                  'Confirm'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Settings;
