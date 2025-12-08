@@ -123,18 +123,18 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-base font-semibold text-[#1A2A3A]">Recent Orders</h2>
                 <a className="px-6 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap" href="/orders">
-                  View All
+                  All
                 </a>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Order ID</th>
+                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600 hidden md:table-cell">Order ID</th>
                       <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Client</th>
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Item</th>
+                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600 hidden sm:table-cell">Item</th>
                       <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Status</th>
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Due Date</th>
+                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600 hidden lg:table-cell">Due Date</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -147,15 +147,15 @@ const Dashboard: React.FC = () => {
                     ) : (
                       recentOrders.map((order, index) => (
                       <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-4 text-sm text-[#1A2A3A] font-medium">{order.id.substring(0, 8)}</td>
+                        <td className="py-4 px-4 text-sm text-[#1A2A3A] font-medium hidden md:table-cell">{order.id.substring(0, 8)}</td>
                         <td className="py-4 px-4 text-sm text-gray-700">{order.client.name}</td>
-                        <td className="py-4 px-4 text-sm text-gray-700">{order.name}</td>
+                        <td className="py-4 px-4 text-sm text-gray-700 hidden sm:table-cell">{order.name}</td>
                         <td className="py-4 px-4">
                           <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${getStatusColor(order.status)}`}>
                             {order.status.replace('_', ' ')}
                           </span>
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-700">{new Date(order.dueDate).toLocaleDateString()}</td>
+                        <td className="py-4 px-4 text-sm text-gray-700 hidden lg:table-cell">{new Date(order.dueDate).toLocaleDateString()}</td>
                       </tr>
                       ))
                     )}

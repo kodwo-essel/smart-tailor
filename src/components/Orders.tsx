@@ -158,17 +158,17 @@ const Orders: React.FC = () => {
 
           {/* Orders Table */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto md:overflow-visible">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Order ID</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Order ID</th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Client</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Item</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden md:table-cell">Item</th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Status</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Type</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Due Date</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Amount</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden xl:table-cell">Type</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden xl:table-cell">Due Date</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Amount</th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Actions</th>
                   </tr>
                 </thead>
@@ -187,20 +187,20 @@ const Orders: React.FC = () => {
                       </td>
                     </tr>
                   ) : paginatedOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-4 px-6 text-sm text-[#1A2A3A] font-medium">{order.id.substring(0, 8)}</td>
+                    <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors relative">
+                      <td className="py-4 px-6 text-sm text-[#1A2A3A] font-medium hidden lg:table-cell">{order.id.substring(0, 8)}</td>
                       <td className="py-4 px-6 text-sm text-gray-700">{order.client.name}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{order.name}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700 hidden md:table-cell">{order.name}</td>
                       <td className="py-4 px-6">
                         <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${getStatusColor(order.status)}`}>
                           {order.status.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{order.measurement.type}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{new Date(order.dueDate).toLocaleDateString()}</td>
-                      <td className="py-4 px-6 text-sm text-[#1A2A3A] font-medium">${order.price}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700 hidden xl:table-cell">{order.measurement.type}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700 hidden xl:table-cell">{new Date(order.dueDate).toLocaleDateString()}</td>
+                      <td className="py-4 px-6 text-sm text-[#1A2A3A] font-medium hidden lg:table-cell">${order.price}</td>
                       <td className="py-4 px-6">
-                        <div className="flex items-center space-x-2">
+                        <div className="md:flex items-center space-x-2 hidden">
                           <a href={`/orders/${order.id}`} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
                             <i className="ri-eye-line text-lg text-gray-600"></i>
                           </a>
@@ -210,6 +210,11 @@ const Orders: React.FC = () => {
                           >
                             <i className="ri-edit-line text-lg text-gray-600"></i>
                           </button>
+                        </div>
+                        <div className="md:hidden">
+                          <a href={`/orders/${order.id}`} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
+                            <i className="ri-eye-line text-lg text-gray-600"></i>
+                          </a>
                         </div>
                       </td>
                     </tr>
@@ -268,7 +273,7 @@ const Orders: React.FC = () => {
       {/* Create Order Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div 
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => setShowModal(false)}

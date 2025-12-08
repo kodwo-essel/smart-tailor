@@ -20,6 +20,7 @@ const Templates: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -216,34 +217,30 @@ const Templates: React.FC = () => {
             ) : (
               filteredTemplates.map((template) => (
                 <div key={template.id} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0">
-                        <i className="ri-file-list-line text-2xl text-[#1A2A3A]"></i>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-semibold text-[#1A2A3A] mb-1">{template.name}</h3>
-                        <p className="text-sm text-gray-600 truncate">{template.description}</p>
-                        <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                          <span className="flex items-center">
-                            <i className="ri-ruler-line mr-1"></i>{template.fields.length} measurements
-                          </span>
-                          <span>{new Date(template.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0">
+                      <i className="ri-file-list-line text-xl text-[#1A2A3A]"></i>
                     </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      <button 
-                        onClick={() => handleViewTemplate(template)}
-                        className="px-4 py-2 bg-gray-100 text-[#1A2A3A] text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors"
-                      >
-                        View
-                      </button>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-[#1A2A3A] truncate">{template.name}</h3>
+                      <p className="text-xs text-gray-600 truncate">{template.description}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        <i className="ri-ruler-line"></i> {template.fields.length} measurements • {new Date(template.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    {/* Desktop buttons */}
+                    <div className="hidden md:flex items-center gap-2 flex-shrink-0">
                       <button 
                         onClick={() => handleUseTemplate(template)}
-                        className="px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-white bg-[#1A2A3A] rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap"
                       >
                         Use
+                      </button>
+                      <button 
+                        onClick={() => handleViewTemplate(template)}
+                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <i className="ri-eye-line text-lg text-gray-600"></i>
                       </button>
                       <button 
                         onClick={() => handleEditTemplate(template)}
@@ -257,6 +254,46 @@ const Templates: React.FC = () => {
                       >
                         <i className="ri-delete-bin-line text-lg text-red-600"></i>
                       </button>
+                    </div>
+                    {/* Mobile menu */}
+                    <div className="relative flex-shrink-0 md:hidden">
+                      <button 
+                        onClick={() => setOpenMenuId(openMenuId === template.id ? null : template.id)}
+                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <i className="ri-more-2-fill text-xl text-gray-600"></i>
+                      </button>
+                      {openMenuId === template.id && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)}></div>
+                          <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                            <button
+                              onClick={() => { handleViewTemplate(template); setOpenMenuId(null); }}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
+                              <i className="ri-eye-line"></i> View
+                            </button>
+                            <button
+                              onClick={() => { handleUseTemplate(template); setOpenMenuId(null); }}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
+                              <i className="ri-scissors-cut-line"></i> Use
+                            </button>
+                            <button
+                              onClick={() => { handleEditTemplate(template); setOpenMenuId(null); }}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            >
+                              <i className="ri-edit-line"></i> Edit
+                            </button>
+                            <button
+                              onClick={() => { openDeleteModal(template); setOpenMenuId(null); }}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            >
+                              <i className="ri-delete-bin-line"></i> Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -326,8 +363,8 @@ const Templates: React.FC = () => {
       {deleteModal && deletingTemplate && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <i className="ri-delete-bin-line text-2xl text-red-600"></i>
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
             <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Template</h2>
             <p className="text-sm text-gray-600 text-center mb-6">
@@ -354,7 +391,7 @@ const Templates: React.FC = () => {
       {/* View Template Modal */}
       {showViewModal && selectedTemplate && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div 
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => setShowViewModal(false)}
@@ -477,7 +514,7 @@ const TemplateFormModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div 
           className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
           onClick={onCancel}
@@ -639,7 +676,7 @@ const UseTemplateModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div 
           className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
           onClick={onCancel}

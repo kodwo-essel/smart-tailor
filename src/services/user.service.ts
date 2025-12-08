@@ -8,6 +8,8 @@ export interface SubscriptionPlan {
   appointmentsEnabled: boolean;
   isActive: boolean;
   createdAt: string;
+  subscriptionEndDate?: string;
+  subscriptionStatus?: string;
 }
 
 export interface User {
@@ -35,8 +37,8 @@ class UserService {
     return apiService.get<SubscriptionPlan[]>('/api/subscription-plans');
   }
 
-  async updateSubscription(planId: string): Promise<User> {
-    return apiService.put<User>(`/api/users/me/subscription?planId=${planId}`, {});
+  async upgradePlan(planId: string, months: number): Promise<{ reference: string; authorizationUrl: string; amount: number; accessCode: string }> {
+    return apiService.post(`/api/users/me/upgrade-plan`, { planId, months });
   }
 }
 

@@ -13,6 +13,7 @@ import OrderDetails from './components/OrderDetails';
 import AppointmentDetails from './components/AppointmentDetails';
 import Notifications from './components/Notifications';
 import ErrorPage from './components/ErrorPage';
+import PaymentCallback from './components/PaymentCallback';
 import { ToastProvider } from './components/ToastContainer';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/clients/:id" element={<ClientDetails />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
         <Route path="/appointments/:id" element={<AppointmentDetails />} />
+        <Route path="/payment/callback" element={<PaymentCallback />} />
         <Route path="*" element={<ErrorPage />} />
         </Routes>
       </Router>

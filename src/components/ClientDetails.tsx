@@ -15,6 +15,8 @@ const ClientDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [measurements, setMeasurements] = useState<any[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -133,12 +135,18 @@ const ClientDetails: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="mt-8 pt-8 border-t border-gray-200">
+                <div className="mt-8 pt-8 border-t border-gray-200 space-y-3">
                   <button 
                     onClick={() => setShowEditModal(true)}
                     className="w-full px-6 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
                   >
                     Edit Client Info
+                  </button>
+                  <button 
+                    onClick={() => setShowDeleteModal(true)}
+                    className="w-full px-6 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Delete Client
                   </button>
                 </div>
               </div>
@@ -155,7 +163,8 @@ const ClientDetails: React.FC = () => {
                     className="flex items-center space-x-2 text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors"
                   >
                     <i className="ri-add-circle-line text-2xl"></i>
-                    <span className="text-sm font-medium">Add Measurement</span>
+                    <span className="text-sm font-medium hidden sm:inline">Add Measurement</span>
+                    <span className="text-sm font-medium sm:hidden">Add</span>
                   </button>
                 </div>
                 
@@ -197,7 +206,8 @@ const ClientDetails: React.FC = () => {
                     className="flex items-center space-x-2 text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors"
                   >
                     <i className="ri-add-circle-line text-2xl"></i>
-                    <span className="text-sm font-medium">Add Order</span>
+                    <span className="text-sm font-medium hidden sm:inline">Add Order</span>
+                    <span className="text-sm font-medium sm:hidden">Add</span>
                   </button>
                 </div>
                 
@@ -244,7 +254,7 @@ const ClientDetails: React.FC = () => {
       {/* Add Measurement Modal */}
       {showMeasurementModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div 
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => setShowMeasurementModal(false)}
@@ -277,7 +287,7 @@ const ClientDetails: React.FC = () => {
       {/* Edit Client Modal */}
       {showEditModal && client && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div 
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => setShowEditModal(false)}
@@ -310,10 +320,55 @@ const ClientDetails: React.FC = () => {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && client && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
+            </div>
+            <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Client</h2>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              Are you sure you want to delete <span className="font-medium text-[#1A2A3A]">{client.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    await clientService.delete(client.id);
+                    navigate('/clients');
+                  } catch (err: any) {
+                    alert(err.response?.data?.message || 'Failed to delete client');
+                  } finally {
+                    setDeleting(false);
+                  }
+                }}
+                disabled={deleting}
+                className="flex-1 px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+              >
+                {deleting ? (
+                  <i className="ri-loader-4-line animate-spin text-lg"></i>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Order Modal */}
       {showOrderModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div 
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => setShowOrderModal(false)}

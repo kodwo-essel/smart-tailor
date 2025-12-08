@@ -27,6 +27,18 @@ const Calendar: React.FC = () => {
     fetchClients();
   }, [currentPage]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId && appointments.length > 0) {
+      const appointment = appointments.find(a => a.id === editId);
+      if (appointment) {
+        handleEditAppointment(appointment);
+        window.history.replaceState({}, '', '/appointments');
+      }
+    }
+  }, [appointments]);
+
   const fetchAppointments = async () => {
     try {
       setLoading(true);
@@ -203,14 +215,14 @@ const Calendar: React.FC = () => {
           </div>
 
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto md:overflow-visible">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Client</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Type</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Date</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Time</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden md:table-cell">Type</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Date</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Time</th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Status</th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Actions</th>
                   </tr>
@@ -230,18 +242,18 @@ const Calendar: React.FC = () => {
                       </td>
                     </tr>
                   ) : filteredAppointments.map((appointment) => (
-                    <tr key={appointment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr key={appointment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors relative">
                       <td className="py-4 px-6 text-sm font-medium text-[#1A2A3A]">{appointment.client.name}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{appointment.type}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{new Date(appointment.appointmentDate).toLocaleDateString()}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{appointment.appointmentTime}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700 hidden md:table-cell">{appointment.type}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700 hidden lg:table-cell">{new Date(appointment.appointmentDate).toLocaleDateString()}</td>
+                      <td className="py-4 px-6 text-sm text-gray-700 hidden lg:table-cell">{appointment.appointmentTime}</td>
                       <td className="py-4 px-6">
                         <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${getStatusColor(appointment.status)}`}>
                           {appointment.status}
                         </span>
                       </td>
                       <td className="py-4 px-6">
-                        <div className="flex items-center space-x-2">
+                        <div className="md:flex items-center space-x-2 hidden">
                           <a
                             href={`/appointments/${appointment.id}`}
                             className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
@@ -260,6 +272,11 @@ const Calendar: React.FC = () => {
                           >
                             <i className="ri-delete-bin-line text-lg text-red-600"></i>
                           </button>
+                        </div>
+                        <div className="md:hidden">
+                          <a href={`/appointments/${appointment.id}`} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
+                            <i className="ri-eye-line text-lg text-gray-600"></i>
+                          </a>
                         </div>
                       </td>
                     </tr>
@@ -308,8 +325,8 @@ const Calendar: React.FC = () => {
       {deleteModal && deletingAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <i className="ri-delete-bin-line text-2xl text-red-600"></i>
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
             <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Appointment</h2>
             <p className="text-sm text-gray-600 text-center mb-6">
@@ -350,7 +367,7 @@ const Calendar: React.FC = () => {
       {/* Modern Add/Edit Appointment Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             {/* Backdrop */}
             <div 
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
@@ -358,7 +375,7 @@ const Calendar: React.FC = () => {
             ></div>
             
             {/* Modal panel */}
-            <div className="relative transform overflow-hidden rounded-2xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+            <div className="relative transform rounded-2xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 overflow-y-auto max-h-[90vh]">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>

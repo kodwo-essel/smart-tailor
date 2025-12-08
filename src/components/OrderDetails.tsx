@@ -83,9 +83,18 @@ const OrderDetails: React.FC = () => {
                 <i className="ri-arrow-left-line text-xl"></i>
                 <span className="text-sm font-medium">Back to Orders</span>
               </button>
-              <span className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusColor(order.status)}`}>
-                {order.status.replace('_', ' ')}
-              </span>
+              <div className="flex items-center space-x-3">
+                <span className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusColor(order.status)}`}>
+                  {order.status.replace('_', ' ')}
+                </span>
+                <button
+                  onClick={() => navigate('/orders')}
+                  className="px-4 py-2 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors flex items-center space-x-2"
+                >
+                  <i className="ri-edit-line"></i>
+                  <span>Edit</span>
+                </button>
+              </div>
             </div>
 
             {/* Order Info */}

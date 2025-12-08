@@ -146,15 +146,15 @@ const Clients: React.FC = () => {
 
           {/* Clients Table */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto md:overflow-visible">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Client Name</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Phone</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Email</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Notes</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Joined</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden md:table-cell">Phone</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden lg:table-cell">Email</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden xl:table-cell">Notes</th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden lg:table-cell">Joined</th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Actions</th>
                   </tr>
                 </thead>
@@ -173,7 +173,7 @@ const Clients: React.FC = () => {
                       </td>
                     </tr>
                   ) : paginatedClients.map((client, index) => (
-                    <tr key={client.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                    <tr key={client.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors relative ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                       <td className="py-4 px-6">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -186,14 +186,14 @@ const Clients: React.FC = () => {
                           </a>
                         </div>
                       </td>
-                      <td className="py-4 px-6 text-sm text-[#2F2F2F]">{client.phoneNumber}</td>
-                      <td className="py-4 px-6 text-sm text-[#2F2F2F]">{client.email}</td>
-                      <td className="py-4 px-6 text-sm text-[#2F2F2F]">{client.notes || '-'}</td>
-                      <td className="py-4 px-6 text-xs text-gray-500">
+                      <td className="py-4 px-6 text-sm text-[#2F2F2F] hidden md:table-cell">{client.phoneNumber}</td>
+                      <td className="py-4 px-6 text-sm text-[#2F2F2F] hidden lg:table-cell">{client.email}</td>
+                      <td className="py-4 px-6 text-sm text-[#2F2F2F] hidden xl:table-cell">{client.notes || '-'}</td>
+                      <td className="py-4 px-6 text-xs text-gray-500 hidden lg:table-cell">
                         {new Date(client.createdAt).toLocaleDateString()}
                       </td>
                       <td className="py-4 px-6">
-                        <div className="flex items-center space-x-2">
+                        <div className="md:flex items-center space-x-2 hidden">
                           <a 
                             href={`/clients/${client.id}`}
                             className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
@@ -212,6 +212,11 @@ const Clients: React.FC = () => {
                           >
                             <i className="ri-delete-bin-line text-lg text-red-600"></i>
                           </button>
+                        </div>
+                        <div className="md:hidden">
+                          <a href={`/clients/${client.id}`} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors">
+                            <i className="ri-eye-line text-lg text-gray-600"></i>
+                          </a>
                         </div>
                       </td>
                     </tr>
@@ -361,8 +366,8 @@ const Clients: React.FC = () => {
       {deleteModal && deletingClient && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mx-auto mb-4">
-              <i className="ri-delete-bin-line text-2xl text-red-600"></i>
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
             <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Client</h2>
             <p className="text-sm text-gray-600 text-center mb-6">

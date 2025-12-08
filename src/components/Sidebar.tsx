@@ -142,8 +142,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
     {showLogoutModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
-          <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-6">
-            <i className="ri-logout-box-r-line text-3xl text-red-600"></i>
+          <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-6">
+            <i className="ri-scissors-cut-line text-3xl text-[#1A2A3A]"></i>
           </div>
           <h2 className="text-2xl font-bold text-[#1A2A3A] text-center mb-3">Logout</h2>
           <p className="text-sm text-gray-600 text-center mb-8">

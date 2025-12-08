@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
@@ -6,6 +7,7 @@ import { authService, userService, User, SubscriptionPlan } from '../services';
 import { useToast } from './ToastContainer';
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Profile');
@@ -17,6 +19,7 @@ const Settings: React.FC = () => {
   const [updatingPlan, setUpdatingPlan] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [months, setMonths] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
     phoneNumber: '',
@@ -27,6 +30,12 @@ const Settings: React.FC = () => {
   useEffect(() => {
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/signin');
+    }
+  }, [loading, user]);
 
   const fetchUser = async () => {
     try {
@@ -103,16 +112,15 @@ const Settings: React.FC = () => {
     
     setUpdatingPlan(true);
     try {
-      await userService.updateSubscription(selectedPlan.id);
-      const updatedUser = await userService.getMe();
-      setUser(updatedUser);
-      authService.setUser(updatedUser);
+      const response = await userService.upgradePlan(selectedPlan.id, months);
+      window.open(response.authorizationUrl, '_blank');
       setShowPlanModal(false);
       setSelectedPlan(null);
-      showToast('Subscription plan updated successfully!', 'success');
+      showToast('Payment window opened. Complete payment to activate your plan.', 'info');
     } catch (error: any) {
-      console.error('Failed to update plan:', error);
-      showToast(error.response?.data?.message || 'Failed to update plan', 'error');
+      console.error('Failed to initiate payment:', error);
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to initiate payment';
+      showToast(errorMessage, 'error');
     } finally {
       setUpdatingPlan(false);
     }
@@ -271,37 +279,58 @@ const Settings: React.FC = () => {
                   
                   <div className="grid md:grid-cols-3 gap-6">
                     {plans.map((plan) => {
-                      const isCurrentPlan = user.subscriptionPlan.id === plan.id;
+                      const isCurrentPlan = user.subscriptionPlan?.id === plan.id;
+                      const planOrder = { 'FREE': 0, 'STANDARD': 1, 'PREMIUM': 2 };
+                      const currentPlanOrder = planOrder[user.subscriptionPlan?.name as keyof typeof planOrder] ?? -1;
+                      const thisPlanOrder = planOrder[plan.name as keyof typeof planOrder] ?? 0;
+                      const isLowerPlan = thisPlanOrder < currentPlanOrder;
                       return (
                         <div 
                           key={plan.id}
-                          className={`border-2 rounded-xl p-6 transition-all ${
+                          className={`rounded-xl p-6 transition-all relative overflow-hidden border-2 border-gray-200 ${
                             isCurrentPlan 
-                              ? 'border-[#1A2A3A] bg-[#1A2A3A]/5' 
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'bg-gradient-to-br from-green-50 to-emerald-50' 
+                              : 'hover:border-gray-300 bg-white'
                           }`}
                         >
-                          <h3 className="text-lg font-bold text-[#1A2A3A] mb-2">{plan.name}</h3>
-                          <p className="text-sm text-gray-600 mb-4">{plan.description}</p>
+                          {isCurrentPlan && (
+                            <div className="absolute top-4 right-4">
+                              <div className="flex items-center space-x-1 px-2 py-1 bg-green-600 rounded-full">
+                                <i className="ri-checkbox-circle-fill text-white text-sm"></i>
+                                <span className="text-xs font-semibold text-white">Active</span>
+                              </div>
+                            </div>
+                          )}
+                          <h3 className={`text-lg font-bold mb-2 ${isCurrentPlan ? 'text-green-800' : 'text-[#1A2A3A]'}`}>{plan.name}</h3>
+                          <p className={`text-sm mb-4 ${isCurrentPlan ? 'text-green-700' : 'text-gray-600'}`}>{plan.description}</p>
+                          
+                          {isCurrentPlan && user.subscriptionPlan?.subscriptionEndDate && (
+                            <div className="mb-4">
+                              <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-md">
+                                Expires {new Date(user.subscriptionPlan.subscriptionEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            </div>
+                          )}
+                          
                           <div className="mb-4">
-                            <div className="flex items-center text-sm text-gray-700 mb-2">
+                            <div className={`flex items-center text-sm mb-2 ${isCurrentPlan ? 'text-green-700' : 'text-gray-700'}`}>
                               <i className={`${plan.appointmentsEnabled ? 'ri-checkbox-circle-line text-green-600' : 'ri-close-circle-line text-red-600'} mr-2`}></i>
                               Appointments {plan.appointmentsEnabled ? 'Enabled' : 'Disabled'}
                             </div>
                           </div>
-                          {isCurrentPlan ? (
+                          {isCurrentPlan ? null : isLowerPlan ? (
                             <button 
                               disabled
-                              className="w-full px-4 py-3 bg-gray-200 text-gray-600 text-sm font-medium rounded-lg cursor-not-allowed"
+                              className="w-full px-4 py-3 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed"
                             >
-                              Current Plan
+                              Lower Plan
                             </button>
                           ) : (
                             <button 
                               onClick={() => openPlanModal(plan)}
                               className="w-full px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
                             >
-                              Select Plan
+                              Upgrade to {plan.name}
                             </button>
                           )}
                         </div>
@@ -331,13 +360,26 @@ const Settings: React.FC = () => {
       {showPlanModal && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
-            <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto mb-6">
-              <i className="ri-bank-card-line text-3xl text-blue-600"></i>
+            <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-6">
+              <i className="ri-scissors-cut-line text-3xl text-[#1A2A3A]"></i>
             </div>
-            <h2 className="text-2xl font-bold text-[#1A2A3A] text-center mb-3">Change Subscription Plan</h2>
-            <p className="text-sm text-gray-600 text-center mb-6">
-              Are you sure you want to switch to the <span className="font-semibold text-[#1A2A3A]">{selectedPlan.name}</span> plan?
+            <h2 className="text-2xl font-bold text-[#1A2A3A] text-center mb-3">Upgrade Subscription Plan</h2>
+            <p className="text-sm text-gray-600 text-center mb-4">
+              You are upgrading to the <span className="font-semibold text-[#1A2A3A]">{selectedPlan.name}</span> plan.
             </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[#1A2A3A] mb-2 text-left">Subscription Duration</label>
+              <select
+                value={months}
+                onChange={(e) => setMonths(Number(e.target.value))}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+              >
+                <option value={1}>1 Month</option>
+                <option value={3}>3 Months</option>
+                <option value={6}>6 Months</option>
+                <option value={12}>12 Months</option>
+              </select>
+            </div>
             <div className="flex items-center space-x-3">
               <button 
                 onClick={() => {
@@ -357,7 +399,7 @@ const Settings: React.FC = () => {
                 {updatingPlan ? (
                   <i className="ri-loader-4-line animate-spin text-lg"></i>
                 ) : (
-                  'Confirm'
+                  'Proceed'
                 )}
               </button>
             </div>

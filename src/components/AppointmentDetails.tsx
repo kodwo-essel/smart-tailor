@@ -11,6 +11,8 @@ const AppointmentDetails: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -199,10 +201,74 @@ const AppointmentDetails: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="mt-8 pt-8 border-t border-gray-200 flex items-center space-x-3">
+                <button
+                  onClick={() => navigate(`/appointments?edit=${appointment.id}`)}
+                  className="flex-1 px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors flex items-center justify-center space-x-2"
+                >
+                  <i className="ri-edit-line"></i>
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <i className="ri-delete-bin-line"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
           </div>
         </main>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
+            </div>
+            <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Appointment</h2>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              Are you sure you want to delete this appointment? This action cannot be undone.
+            </p>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    await appointmentService.delete(appointment.id);
+                    navigate('/appointments');
+                  } catch (error) {
+                    console.error('Failed to delete appointment:', error);
+                    alert('Failed to delete appointment');
+                  } finally {
+                    setDeleting(false);
+                  }
+                }}
+                disabled={deleting}
+                className="flex-1 px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+              >
+                {deleting ? (
+                  <i className="ri-loader-4-line animate-spin text-lg"></i>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
