@@ -32,9 +32,9 @@ export default function Home() {
           <div className="flex items-center justify-between h-20">
             <Link to="/" className="flex items-center space-x-3">
               <div className="w-10 h-10 flex items-center justify-center">
-                <i className={`ri-scissors-cut-line text-3xl ${isScrolled ? 'text-[#1A2A3A]' : 'text-white'}`}></i>
+                <i className={`ri-scissors-cut-line text-2xl ${isScrolled ? 'text-[#1A2A3A]' : 'text-white'}`}></i>
               </div>
-              <span className={`text-2xl font-bold ${isScrolled ? 'text-[#1A2A3A]' : 'text-white'}`} style={{ fontFamily: '"Russo One", sans-serif' }}>Smart Tailor</span>
+              <span className={`text-lg font-bold ${isScrolled ? 'text-[#1A2A3A]' : 'text-white'}`} style={{ fontFamily: '"Russo One", sans-serif' }}>Smart Tailor</span>
             </Link>
 
             <div className="hidden md:flex items-center space-x-10">

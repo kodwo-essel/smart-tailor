@@ -7,7 +7,7 @@ export default function HeroSection() {
 
         <AnimatedText 
           text="The Smart Way to Manage Your Tailoring Business"
-          className="text-4xl lg:text-5xl text-white leading-tight mb-8 mt-16"
+          className="text-4xl lg:text-5xl text-white leading-tight mb-4 mt-16"
           style={{ fontFamily: '"Russo One", sans-serif' }}
           delay={500}
           speed={80}
@@ -22,7 +22,7 @@ export default function HeroSection() {
           <button className="px-8 py-4 bg-[#D9C7A8] text-[#1A2A3A] text-base font-bold rounded-lg hover:bg-white transition-colors whitespace-nowrap" style={{ fontFamily: '"Russo One", sans-serif' }}>
             Get Started →
           </button>
-          <button className="px-8 py-4 bg-transparent text-white text-base font-medium rounded-lg border-2 border-white/30 hover:border-white hover:bg-white/10 transition-colors whitespace-nowrap">
+          <button className="px-8 py-4 bg-transparent text-white text-sm font-medium rounded-lg border-2 border-white/30 hover:border-white hover:bg-white/10 transition-colors whitespace-nowrap">
             Sign In
           </button>
         </div>

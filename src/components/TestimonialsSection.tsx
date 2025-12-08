@@ -44,7 +44,7 @@ export default function TestimonialsSection() {
                   <Star key={i} className="w-5 h-5 text-[#D9C7A8] fill-current" />
                 ))}
               </div>
-              <p className="text-base text-[#2F2F2F] leading-relaxed mb-6 italic">
+              <p className="text-base text-[#2F2F2F] leading-relaxed mb-4 italic">
                 "{testimonial.text}"
               </p>
               <div className="border-t border-[#F7F6F3] pt-6">

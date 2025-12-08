@@ -75,7 +75,7 @@ const OrderDetails: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           <div className="max-w-5xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
               <button
                 onClick={() => navigate('/orders')}
                 className="flex items-center space-x-2 text-gray-600 hover:text-[#1A2A3A] transition-colors"
@@ -101,11 +101,11 @@ const OrderDetails: React.FC = () => {
             <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#1A2A3A] mb-2">{order.name}</h2>
+                  <h2 className="text-lg font-bold text-[#1A2A3A] mb-2">{order.name}</h2>
                   <p className="text-sm text-gray-600">Order ID: {order.id.substring(0, 8)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-[#1A2A3A]">${order.price}</p>
+                  <p className="text-lg font-bold text-[#1A2A3A]">${order.price}</p>
                   <p className="text-sm text-gray-600">Total Amount</p>
                 </div>
               </div>
@@ -113,17 +113,17 @@ const OrderDetails: React.FC = () => {
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
                   <p className="text-xs text-gray-600 mb-1">Client</p>
-                  <p className="text-sm font-semibold text-[#1A2A3A]">{order.client.name}</p>
+                  <p className="text-xs font-semibold text-[#1A2A3A]">{order.client.name}</p>
                   <p className="text-xs text-gray-600">{order.client.phoneNumber}</p>
                   <p className="text-xs text-gray-600">{order.client.email}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 mb-1">Tailor</p>
-                  <p className="text-sm font-semibold text-[#1A2A3A]">{order.tailor.name}</p>
+                  <p className="text-xs font-semibold text-[#1A2A3A]">{order.tailor.name}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 mb-1">Due Date</p>
-                  <p className="text-sm font-semibold text-[#1A2A3A]">{new Date(order.dueDate).toLocaleDateString()}</p>
+                  <p className="text-xs font-semibold text-[#1A2A3A]">{new Date(order.dueDate).toLocaleDateString()}</p>
                   <p className="text-xs text-gray-600 mt-2">Created: {new Date(order.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -149,7 +149,7 @@ const OrderDetails: React.FC = () => {
                 {Object.entries(order.measurement.data).map(([key, value]) => (
                   <div key={key} className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-xs text-gray-600 mb-1 capitalize">{key.replace(/_/g, ' ')}</p>
-                    <p className="text-sm font-semibold text-[#1A2A3A]">{value}</p>
+                    <p className="text-xs font-semibold text-[#1A2A3A]">{value}</p>
                   </div>
                 ))}
               </div>

@@ -8,9 +8,10 @@ class WebSocketService {
 
   connect(onNotification: (notification: any) => void): void {
     const user = authService.getUser();
-    if (!user?.id || this.connected) return;
+    const token = authService.getToken();
+    if (!user?.id || !token || this.connected) return;
 
-    const socket = new SockJS('http://localhost:8080/ws/notifications');
+    const socket = new SockJS(`http://localhost:8080/ws/notifications?token=${token}`);
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect({}, () => {
@@ -19,6 +20,9 @@ class WebSocketService {
         const notification = JSON.parse(message.body);
         onNotification(notification);
       });
+    }, (error) => {
+      console.error('WebSocket connection error:', error);
+      this.connected = false;
     });
   }
 

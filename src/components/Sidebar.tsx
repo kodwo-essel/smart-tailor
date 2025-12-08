@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
         <div className="h-20 flex items-center justify-between px-4 border-b border-gray-200">
           <a className="flex items-center space-x-3" href="/">
             <div className="w-10 h-10 flex items-center justify-center">
-              <i className="ri-scissors-cut-line text-3xl text-[#1A2A3A]"></i>
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
             {!collapsed && <span className="text-lg font-bold text-[#1A2A3A]">Smart Tailor</span>}
           </a>
@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto overflow-x-visible py-8 px-4">
+        <nav className="flex-1 overflow-y-auto overflow-x-visible py-6 px-4">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const isActive = currentPage === item.key;
@@ -113,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#1A2A3A] truncate">{user?.name || 'User'}</p>
+                <p className="text-xs font-semibold text-[#1A2A3A] truncate">{user?.name || 'User'}</p>
                 <p className="text-xs text-[#2F2F2F] truncate">{user?.email || ''}</p>
               </div>
               <button 
@@ -142,16 +142,16 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
           <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-6">
-            <i className="ri-scissors-cut-line text-3xl text-[#1A2A3A]"></i>
+            <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
           </div>
-          <h2 className="text-2xl font-bold text-[#1A2A3A] text-center mb-3">Logout</h2>
-          <p className="text-sm text-gray-600 text-center mb-8">
+          <h2 className="text-lg font-bold text-[#1A2A3A] text-center mb-3">Logout</h2>
+          <p className="text-sm text-gray-600 text-center mb-6">
             Are you sure you want to logout from your account?
           </p>
           <div className="flex items-center space-x-3">
             <button 
               onClick={() => setShowLogoutModal(false)}
-              className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
@@ -160,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
                 authService.logout();
                 window.location.href = '/signin';
               }}
-              className="flex-1 px-6 py-3 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg"
+              className="flex-1 px-4 py-2 bg-red-600 text-white text-xs font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg"
             >
               Logout
             </button>

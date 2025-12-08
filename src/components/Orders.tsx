@@ -145,22 +145,22 @@ const Orders: React.FC = () => {
         
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             {stats.map((stat, index) => (
               <div key={index} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                <h3 className="text-2xl font-bold text-[#1A2A3A] mb-1">{stat.value}</h3>
+                <h3 className="text-base font-bold text-[#1A2A3A] mb-1">{stat.value}</h3>
                 <p className="text-xs text-gray-600">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Filters and Search */}
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
             <div className="flex flex-wrap items-center gap-3">
               {statusFilters.map((filter) => (
                 <button 
                   key={filter}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
                     activeFilter === filter 
                       ? 'bg-[#1A2A3A] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -189,44 +189,44 @@ const Orders: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Order ID</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Client</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden md:table-cell">Item</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Status</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden xl:table-cell">Type</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden xl:table-cell">Due Date</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Amount</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Actions</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden lg:table-cell">Order ID</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A]">Client</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden md:table-cell">Item</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A]">Status</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden xl:table-cell">Type</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden xl:table-cell">Due Date</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden lg:table-cell">Amount</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center">
+                      <td colSpan={9} className="py-6 text-center">
                         <Loader size="md" text="Loading orders..." />
                       </td>
                     </tr>
                   ) : paginatedOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-12 text-center">
-                        <i className="ri-shopping-bag-line text-3xl text-gray-400"></i>
-                        <p className="text-sm text-gray-500 mt-2">No orders found</p>
+                      <td colSpan={9} className="py-6 text-center">
+                        <i className="ri-shopping-bag-line text-xl text-gray-400"></i>
+                        <p className="text-xs text-gray-500 mt-2">No orders found</p>
                       </td>
                     </tr>
                   ) : paginatedOrders.map((order) => (
                     <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors relative">
-                      <td className="py-4 px-6 text-sm text-[#1A2A3A] font-medium hidden lg:table-cell">{order.id.substring(0, 8)}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700">{order.client.name}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700 hidden md:table-cell">{order.name}</td>
-                      <td className="py-4 px-6">
-                        <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${getStatusColor(order.status)}`}>
+                      <td className="py-3 px-4 text-xs text-[#1A2A3A] font-medium hidden lg:table-cell">{order.id.substring(0, 8)}</td>
+                      <td className="py-3 px-4 text-xs text-gray-700">{order.client.name}</td>
+                      <td className="py-3 px-4 text-xs text-gray-700 hidden md:table-cell">{order.name}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${getStatusColor(order.status)}`}>
                           {order.status.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-700 hidden xl:table-cell">{order.measurement.type}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700 hidden xl:table-cell">{new Date(order.dueDate).toLocaleDateString()}</td>
-                      <td className="py-4 px-6 text-sm text-[#1A2A3A] font-medium hidden lg:table-cell">${order.price}</td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-4 text-xs text-gray-700 hidden xl:table-cell">{order.measurement.type}</td>
+                      <td className="py-3 px-4 text-xs text-gray-700 hidden xl:table-cell">{new Date(order.dueDate).toLocaleDateString()}</td>
+                      <td className="py-3 px-4 text-xs text-[#1A2A3A] font-medium hidden lg:table-cell">${order.price}</td>
+                      <td className="py-3 px-4">
                         <div className="md:flex items-center space-x-2 hidden">
                           <a href={`/orders/${order.id}`} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
                             <i className="ri-eye-line text-lg text-gray-600"></i>

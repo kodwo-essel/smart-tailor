@@ -14,7 +14,7 @@ export default function Footer() {
                   <line x1="8.12" y1="8.12" x2="12" y2="12" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold text-white" style={{ fontFamily: '"Russo One", sans-serif' }}>
+              <span className="text-lg font-bold text-white" style={{ fontFamily: '"Russo One", sans-serif' }}>
                 Smart Tailor
               </span>
             </div>

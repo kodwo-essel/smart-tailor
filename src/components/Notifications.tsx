@@ -34,15 +34,20 @@ const Notifications: React.FC = () => {
     }
   };
 
-  const handleMarkAsRead = async (id: string) => {
-    try {
-      await notificationService.markAsRead(id);
-      setNotifications(notifications.map(n => 
-        n.id === id ? { ...n, isRead: true } : n
-      ));
-    } catch (error) {
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, isRead: true } : n
+    ));
+    notificationService.markAsRead(id).catch(error => {
       console.error('Failed to mark notification as read:', error);
-    }
+    });
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+    notificationService.markAllAsRead().catch(error => {
+      console.error('Failed to mark all as read:', error);
+    });
   };
 
   const getNotificationIcon = (type: string) => {
@@ -74,42 +79,53 @@ const Notifications: React.FC = () => {
         
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           {/* Filter Tabs */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  filter === 'all' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter('unread')}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center space-x-2 ${
-                  filter === 'unread' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <span>Unread</span>
-                {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
+          <div className="mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    filter === 'all' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setFilter('unread')}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center space-x-2 ${
+                    filter === 'unread' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <span>Unread</span>
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className="px-4 py-2 text-sm font-medium text-[#1A2A3A] hover:bg-gray-100 rounded-lg transition-colors flex items-center space-x-2 ml-auto"
+                >
+                  <i className="ri-check-double-line text-base"></i>
+                  <span>Mark All as Read</span>
+                </button>
+              )}
             </div>
           </div>
 
           {/* Notifications List */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {loading ? (
-              <div className="py-12 text-center">
-                <i className="ri-loader-4-line animate-spin text-3xl text-gray-400"></i>
+              <div className="py-8 text-center">
+                <i className="ri-loader-4-line animate-spin text-2xl text-gray-400"></i>
                 <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
               </div>
             ) : filteredNotifications.length === 0 ? (
-              <div className="py-12 text-center">
-                <i className="ri-notification-line text-3xl text-gray-400"></i>
+              <div className="py-8 text-center">
+                <i className="ri-notification-line text-2xl text-gray-400"></i>
                 <p className="text-sm text-gray-500 mt-2">No notifications</p>
               </div>
             ) : (
@@ -118,40 +134,37 @@ const Notifications: React.FC = () => {
                 return (
                   <div
                     key={notification.id}
-                    className={`bg-white border rounded-xl p-4 hover:shadow-md transition-shadow ${
-                      notification.isRead ? 'border-gray-200' : 'border-[#1A2A3A] bg-[#1A2A3A]/5'
+                    onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                    className={`border rounded-lg p-3 transition-all ${
+                      notification.isRead 
+                        ? 'bg-white border-gray-200 hover:shadow-sm' 
+                        : 'bg-gray-100 border-gray-400 border-l-4 hover:bg-gray-200 cursor-pointer shadow-sm'
                     }`}
                   >
-                    <div className="flex items-start space-x-4">
-                      <div className={`w-12 h-12 flex items-center justify-center rounded-full flex-shrink-0 ${iconConfig.color}`}>
-                        <i className={`${iconConfig.icon} text-xl`}></i>
+                    <div className="flex items-start space-x-3">
+                      <div className={`w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0 ${iconConfig.color}`}>
+                        <i className={`${iconConfig.icon} text-lg`}></i>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-1">
-                          <h3 className="text-sm font-semibold text-[#1A2A3A]">{notification.title}</h3>
+                        <div className="flex items-start justify-between mb-0.5">
+                          <h3 className={`text-xs font-semibold ${
+                            notification.isRead ? 'text-gray-700' : 'text-[#1A2A3A]'
+                          }`}>{notification.title}</h3>
                           {!notification.isRead && (
-                            <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 ml-2 mt-1"></span>
+                            <span className="w-2.5 h-2.5 bg-gray-600 rounded-full flex-shrink-0 ml-2 mt-1"></span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
+                        <p className={`text-xs mb-1 ${
+                          notification.isRead ? 'text-gray-500' : 'text-gray-700'
+                        }`}>{notification.message}</p>
                         {notification.order && (
-                          <div className="text-xs text-gray-500 mb-2">
+                          <div className="text-xs text-gray-500 mb-1">
                             Order: {notification.order.name} - {notification.order.clientName}
                           </div>
                         )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">
-                            {new Date(notification.createdAt).toLocaleString()}
-                          </span>
-                          {!notification.isRead && (
-                            <button
-                              onClick={() => handleMarkAsRead(notification.id)}
-                              className="text-xs text-[#1A2A3A] hover:underline font-medium"
-                            >
-                              Mark as read
-                            </button>
-                          )}
-                        </div>
+                        <span className="text-xs text-gray-400">
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </span>
                       </div>
                     </div>
                   </div>

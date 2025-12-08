@@ -21,12 +21,16 @@ class NotificationService {
   }
 
   async getUnreadCount(): Promise<number> {
-    const response = await apiService.get<{ count: number }>(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT);
-    return response.count || 0;
+    const response = await apiService.get<{ unreadCount: number }>(API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT);
+    return response.unreadCount || 0;
   }
 
   async markAsRead(id: string): Promise<void> {
     return apiService.put<void>(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id), {});
+  }
+
+  async markAllAsRead(): Promise<void> {
+    return apiService.put<void>(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ, {});
   }
 }
 

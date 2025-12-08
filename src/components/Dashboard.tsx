@@ -100,11 +100,11 @@ const Dashboard: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           {/* Stats Cards */}
           {loading ? (
-            <div className="flex items-center justify-center py-12 mb-12">
+            <div className="flex items-center justify-center py-8 mb-12">
               <Loader size="md" text="Loading dashboard..." />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               {stats.map((stat, index) => {
                 const isNegative = stat.change.startsWith('-');
                 const trendData = stat.trend.map((value: number) => ({ value }));
@@ -116,8 +116,8 @@ const Dashboard: React.FC = () => {
                     </div>
                     <div className="flex items-end justify-between gap-3">
                       <div>
-                        <h3 className="text-2xl font-bold text-[#1A2A3A]">{stat.value}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+                        <h3 className="text-lg font-bold text-[#1A2A3A]">{stat.value}</h3>
+                        <p className="text-[10px] text-gray-500 mt-1">{stat.label}</p>
                       </div>
                       <div className="w-20 h-12">
                         <ResponsiveContainer width="100%" height="100%">
@@ -140,10 +140,10 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* Charts */}
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid lg:grid-cols-2 gap-6 mb-6">
             {/* Revenue Chart */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h2 className="text-base font-semibold text-[#1A2A3A] mb-4">Revenue Overview</h2>
+              <h2 className="text-xs font-semibold text-[#1A2A3A] mb-4">Revenue Overview</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={revenueTrend?.monthlyData?.map((item: any) => ({
                   month: item.month.substring(0, 3),
@@ -160,7 +160,7 @@ const Dashboard: React.FC = () => {
 
             {/* Orders Status Chart */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h2 className="text-base font-semibold text-[#1A2A3A] mb-4">Orders by Status</h2>
+              <h2 className="text-xs font-semibold text-[#1A2A3A] mb-4">Orders by Status</h2>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
@@ -198,8 +198,8 @@ const Dashboard: React.FC = () => {
             {/* Recent Orders */}
             <div className={`${userPlan?.name === 'FREE' ? 'lg:col-span-1' : 'lg:col-span-2'} bg-white border border-gray-200 rounded-xl p-6`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-base font-semibold text-[#1A2A3A]">Recent Orders</h2>
-                <a className="px-6 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap" href="/orders">
+                <h2 className="text-xs font-semibold text-[#1A2A3A]">Recent Orders</h2>
+                <a className="px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap" href="/orders">
                   All
                 </a>
               </div>
@@ -207,32 +207,32 @@ const Dashboard: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600 hidden md:table-cell">Order ID</th>
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Client</th>
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600 hidden sm:table-cell">Item</th>
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600">Status</th>
-                      <th className="text-left py-4 px-4 text-xs font-medium text-gray-600 hidden lg:table-cell">Due Date</th>
+                      <th className="text-left py-3 px-3 text-[10px] font-medium text-gray-600 hidden md:table-cell">Order ID</th>
+                      <th className="text-left py-3 px-3 text-[10px] font-medium text-gray-600">Client</th>
+                      <th className="text-left py-3 px-3 text-[10px] font-medium text-gray-600 hidden sm:table-cell">Item</th>
+                      <th className="text-left py-3 px-3 text-[10px] font-medium text-gray-600">Status</th>
+                      <th className="text-left py-3 px-3 text-[10px] font-medium text-gray-600 hidden lg:table-cell">Due Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentOrders.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-8 text-center text-sm text-gray-500">
+                        <td colSpan={5} className="py-6 text-center text-xs text-gray-500">
                           No orders yet
                         </td>
                       </tr>
                     ) : (
                       recentOrders.map((order, index) => (
                       <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-4 text-sm text-[#1A2A3A] font-medium hidden md:table-cell">{order.id.substring(0, 8)}</td>
-                        <td className="py-4 px-4 text-sm text-gray-700">{order.client.name}</td>
-                        <td className="py-4 px-4 text-sm text-gray-700 hidden sm:table-cell">{order.name}</td>
-                        <td className="py-4 px-4">
-                          <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${getStatusColor(order.status)}`}>
+                        <td className="py-3 px-3 text-xs text-[#1A2A3A] font-medium hidden md:table-cell">{order.id.substring(0, 8)}</td>
+                        <td className="py-3 px-3 text-xs text-gray-700">{order.client.name}</td>
+                        <td className="py-3 px-3 text-xs text-gray-700 hidden sm:table-cell">{order.name}</td>
+                        <td className="py-3 px-3">
+                          <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${getStatusColor(order.status)}`}>
                             {order.status.replace('_', ' ')}
                           </span>
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-700 hidden lg:table-cell">{new Date(order.dueDate).toLocaleDateString()}</td>
+                        <td className="py-3 px-3 text-xs text-gray-700 hidden lg:table-cell">{new Date(order.dueDate).toLocaleDateString()}</td>
                       </tr>
                       ))
                     )}
@@ -244,14 +244,14 @@ const Dashboard: React.FC = () => {
             {/* Upcoming Appointments */}
             {userPlan?.name !== 'FREE' && (
             <div className="bg-white border border-gray-200 rounded-xl p-6">
-              <h2 className="text-base font-semibold text-[#1A2A3A] mb-6">Upcoming Appointments</h2>
+              <h2 className="text-xs font-semibold text-[#1A2A3A] mb-6">Upcoming Appointments</h2>
               <div className="space-y-6">
                 {loading ? (
-                  <div className="py-8 text-center">
+                  <div className="py-6 text-center">
                     <Loader size="sm" />
                   </div>
                 ) : appointments.length === 0 ? (
-                  <div className="py-8 text-center text-sm text-gray-500">
+                  <div className="py-6 text-center text-xs text-gray-500">
                     No upcoming appointments
                   </div>
                 ) : appointments.map((appointment) => (
@@ -260,9 +260,9 @@ const Dashboard: React.FC = () => {
                       <i className="ri-calendar-line text-xl text-[#1A2A3A]"></i>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-[#1A2A3A] mb-1">{appointment.client.name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{appointment.type}</p>
-                      <div className="flex items-center space-x-4 text-xs text-gray-600">
+                      <h3 className="text-xs font-medium text-[#1A2A3A] mb-1">{appointment.client.name}</h3>
+                      <p className="text-xs text-gray-600 mb-2">{appointment.type}</p>
+                      <div className="flex items-center space-x-4 text-[10px] text-gray-600">
                         <span className="flex items-center">
                           <i className="ri-time-line mr-1"></i>{appointment.appointmentTime}
                         </span>
@@ -274,7 +274,7 @@ const Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <a href="/appointments" className="block w-full mt-6 px-6 py-3 bg-gray-100 text-[#1A2A3A] text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap text-center">
+              <a href="/appointments" className="block w-full mt-6 px-4 py-2 bg-gray-100 text-[#1A2A3A] text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap text-center">
                 View All Appointments
               </a>
             </div>

@@ -53,7 +53,7 @@ export default function FeaturesSection() {
                 <div className="w-14 h-14 flex items-center justify-center bg-[#1A2A3A] rounded-lg mb-6">
                   <Icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-[#1A2A3A] mb-4" style={{ fontFamily: '"Russo One", sans-serif' }}>
+                <h3 className="text-lg font-bold text-[#1A2A3A] mb-4" style={{ fontFamily: '"Russo One", sans-serif' }}>
                   {feature.title}
                 </h3>
                 <p className="text-base text-[#2F2F2F] leading-relaxed">

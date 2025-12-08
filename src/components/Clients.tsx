@@ -157,7 +157,7 @@ const Clients: React.FC = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-12 bg-gray-50">
           {/* Search and Add Client */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <i className="ri-search-line text-xl text-gray-400"></i>
@@ -179,49 +179,49 @@ const Clients: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Client Name</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden md:table-cell">Phone</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden lg:table-cell">Email</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden xl:table-cell">Notes</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F] hidden lg:table-cell">Joined</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#2F2F2F]">Actions</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#2F2F2F]">Client Name</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#2F2F2F] hidden md:table-cell">Phone</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#2F2F2F] hidden lg:table-cell">Email</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#2F2F2F] hidden xl:table-cell">Notes</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#2F2F2F] hidden lg:table-cell">Joined</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#2F2F2F]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center">
+                      <td colSpan={6} className="py-6 text-center">
                         <Loader size="md" text="Loading clients..." />
                       </td>
                     </tr>
                   ) : paginatedClients.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center">
-                        <i className="ri-user-line text-3xl text-gray-400"></i>
-                        <p className="text-sm text-gray-500 mt-2">No clients found</p>
+                      <td colSpan={6} className="py-6 text-center">
+                        <i className="ri-user-line text-xl text-gray-400"></i>
+                        <p className="text-xs text-gray-500 mt-2">No clients found</p>
                       </td>
                     </tr>
                   ) : paginatedClients.map((client, index) => (
                     <tr key={client.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors relative ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-bold text-gray-600">
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-bold text-gray-600">
                               {client.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
-                          <a className="text-sm font-medium text-[#1A2A3A] hover:underline cursor-pointer" href={`/clients/${client.id}`}>
+                          <a className="text-xs font-medium text-[#1A2A3A] hover:underline cursor-pointer" href={`/clients/${client.id}`}>
                             {client.name}
                           </a>
                         </div>
                       </td>
-                      <td className="py-4 px-6 text-sm text-[#2F2F2F] hidden md:table-cell">{client.phoneNumber}</td>
-                      <td className="py-4 px-6 text-sm text-[#2F2F2F] hidden lg:table-cell">{client.email}</td>
-                      <td className="py-4 px-6 text-sm text-[#2F2F2F] hidden xl:table-cell">{client.notes || '-'}</td>
-                      <td className="py-4 px-6 text-xs text-gray-500 hidden lg:table-cell">
+                      <td className="py-3 px-4 text-xs text-[#2F2F2F] hidden md:table-cell">{client.phoneNumber}</td>
+                      <td className="py-3 px-4 text-xs text-[#2F2F2F] hidden lg:table-cell">{client.email}</td>
+                      <td className="py-3 px-4 text-xs text-[#2F2F2F] hidden xl:table-cell">{client.notes || '-'}</td>
+                      <td className="py-3 px-4 text-[10px] text-gray-500 hidden lg:table-cell">
                         {new Date(client.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-4">
                         <div className="md:flex items-center space-x-2 hidden">
                           <a 
                             href={`/clients/${client.id}`}
@@ -332,11 +332,11 @@ const Clients: React.FC = () => {
                     {profileImage ? (
                       <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
                     ) : editingClient ? (
-                      <span className="text-2xl font-bold text-gray-600">
+                      <span className="text-lg font-bold text-gray-600">
                         {editingClient.name.charAt(0).toUpperCase()}
                       </span>
                     ) : (
-                      <i className="ri-user-line text-3xl text-gray-400"></i>
+                      <i className="ri-user-line text-2xl text-gray-400"></i>
                     )}
                   </div>
                   <input
@@ -426,22 +426,22 @@ const Clients: React.FC = () => {
             <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
               <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
-            <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Client</h2>
-            <p className="text-sm text-gray-600 text-center mb-6">
+            <h2 className="text-base font-semibold text-[#1A2A3A] text-center mb-2">Delete Client</h2>
+            <p className="text-xs text-gray-600 text-center mb-6">
               Are you sure you want to delete <span className="font-medium text-[#1A2A3A]">{deletingClient.name}</span>? This action cannot be undone.
             </p>
             <div className="flex items-center space-x-3">
               <button 
                 onClick={() => setDeleteModal(false)}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
                 {deleting ? (
                   <i className="ri-loader-4-line animate-spin text-lg"></i>

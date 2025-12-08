@@ -180,21 +180,21 @@ const Calendar: React.FC = () => {
                   <i className="ri-lock-line text-2xl text-yellow-600"></i>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[#1A2A3A] mb-2">Upgrade to Access Appointments</h3>
-                  <p className="text-sm text-gray-700 mb-4">Appointments are not available on the FREE plan. Upgrade to STANDARD or PREMIUM to manage appointments.</p>
-                  <a href="/settings" className="inline-block px-6 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors">
+                  <h3 className="text-base font-bold text-[#1A2A3A] mb-2">Upgrade to Access Appointments</h3>
+                  <p className="text-xs text-gray-700 mb-4">Appointments are not available on the FREE plan. Upgrade to STANDARD or PREMIUM to manage appointments.</p>
+                  <a href="/settings" className="inline-block px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors">
                     Upgrade Plan
                   </a>
                 </div>
               </div>
             </div>
           )}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex items-center space-x-4">
                 <button 
                   onClick={() => setFilter('all')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
                     filter === 'all' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -202,7 +202,7 @@ const Calendar: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => setFilter('today')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
                     filter === 'today' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -210,7 +210,7 @@ const Calendar: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => setFilter('week')}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
                     filter === 'week' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -236,40 +236,40 @@ const Calendar: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Client</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden md:table-cell">Type</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Date</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A] hidden lg:table-cell">Time</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Status</th>
-                    <th className="text-left py-4 px-6 text-sm font-bold text-[#1A2A3A]">Actions</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A]">Client</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden md:table-cell">Type</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden lg:table-cell">Date</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A] hidden lg:table-cell">Time</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A]">Status</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-[#1A2A3A]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center">
+                      <td colSpan={6} className="py-6 text-center">
                         <Loader size="md" text="Loading appointments..." />
                       </td>
                     </tr>
                   ) : filteredAppointments.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center">
-                        <i className="ri-calendar-line text-3xl text-gray-400"></i>
-                        <p className="text-sm text-gray-500 mt-2">No appointments found</p>
+                      <td colSpan={6} className="py-6 text-center">
+                        <i className="ri-calendar-line text-xl text-gray-400"></i>
+                        <p className="text-xs text-gray-500 mt-2">No appointments found</p>
                       </td>
                     </tr>
                   ) : filteredAppointments.map((appointment) => (
                     <tr key={appointment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors relative">
-                      <td className="py-4 px-6 text-sm font-medium text-[#1A2A3A]">{appointment.client.name}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700 hidden md:table-cell">{appointment.type}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700 hidden lg:table-cell">{new Date(appointment.appointmentDate).toLocaleDateString()}</td>
-                      <td className="py-4 px-6 text-sm text-gray-700 hidden lg:table-cell">{appointment.appointmentTime}</td>
-                      <td className="py-4 px-6">
-                        <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full border whitespace-nowrap ${getStatusColor(appointment.status)}`}>
+                      <td className="py-3 px-4 text-xs font-medium text-[#1A2A3A]">{appointment.client.name}</td>
+                      <td className="py-3 px-4 text-xs text-gray-700 hidden md:table-cell">{appointment.type}</td>
+                      <td className="py-3 px-4 text-xs text-gray-700 hidden lg:table-cell">{new Date(appointment.appointmentDate).toLocaleDateString()}</td>
+                      <td className="py-3 px-4 text-xs text-gray-700 hidden lg:table-cell">{appointment.appointmentTime}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${getStatusColor(appointment.status)}`}>
                           {appointment.status}
                         </span>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-4">
                         <div className="md:flex items-center space-x-2 hidden">
                           <a
                             href={`/appointments/${appointment.id}`}
@@ -355,22 +355,22 @@ const Calendar: React.FC = () => {
             <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
               <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
-            <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Appointment</h2>
-            <p className="text-sm text-gray-600 text-center mb-6">
+            <h2 className="text-base font-semibold text-[#1A2A3A] text-center mb-2">Delete Appointment</h2>
+            <p className="text-xs text-gray-600 text-center mb-6">
               Are you sure you want to delete the appointment with <span className="font-medium text-[#1A2A3A]">{deletingAppointment.client.name}</span>? This action cannot be undone.
             </p>
             <div className="flex items-center space-x-3">
               <button 
                 onClick={() => setDeleteModal(false)}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleDeleteAppointment}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
                 {deleting ? (
                   <i className="ri-loader-4-line animate-spin text-lg"></i>

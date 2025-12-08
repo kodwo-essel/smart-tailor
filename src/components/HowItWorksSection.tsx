@@ -32,11 +32,11 @@ export default function HowItWorksSection() {
           {steps.map((step, index) => (
             <div key={index} className="text-center">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-[#D9C7A8] rounded-full mb-6">
-                <span className="text-3xl font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>
+                <span className="text-lg font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>
                   {step.number}
                 </span>
               </div>
-              <h3 className="text-2xl font-bold text-[#1A2A3A] mb-4" style={{ fontFamily: '"Russo One", sans-serif' }}>
+              <h3 className="text-lg font-bold text-[#1A2A3A] mb-4" style={{ fontFamily: '"Russo One", sans-serif' }}>
                 {step.title}
               </h3>
               <p className="text-base text-[#2F2F2F] leading-relaxed">

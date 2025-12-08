@@ -77,9 +77,6 @@ const Settings: React.FC = () => {
 
   const tabs = [
     { key: 'Profile', icon: 'ri-user-line', label: 'Profile' },
-    { key: 'Business', icon: 'ri-store-line', label: 'Business' },
-    { key: 'Notifications', icon: 'ri-notification-line', label: 'Notifications' },
-    { key: 'Security', icon: 'ri-shield-line', label: 'Security' },
     { key: 'Billing', icon: 'ri-bank-card-line', label: 'Billing' }
   ];
 
@@ -140,11 +137,11 @@ const Settings: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           <div className="max-w-6xl mx-auto">
             {/* Tab Navigation */}
-            <div className="flex items-center space-x-2 mb-8 overflow-x-auto pb-2">
+            <div className="flex items-center space-x-2 mb-4 overflow-x-auto pb-2">
               {tabs.map((tab) => (
                 <button 
                   key={tab.key}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
                     activeTab === tab.key 
                       ? 'bg-[#1A2A3A] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -165,12 +162,12 @@ const Settings: React.FC = () => {
                 </div>
               ) : activeTab === 'Profile' && (
                 <div className="bg-white border border-gray-200 rounded-xl p-8">
-                  <h2 className="text-xl font-bold text-[#1A2A3A] mb-6">
+                  <h2 className="text-base font-bold text-[#1A2A3A] mb-6">
                     Profile Information
                   </h2>
                   
                   {/* Profile Photo */}
-                  <div className="flex items-center space-x-6 mb-8">
+                  <div className="flex items-center space-x-6 mb-6">
                     <div className="relative">
                       {profilePhoto ? (
                         <img 
@@ -179,7 +176,7 @@ const Settings: React.FC = () => {
                           className="w-24 h-24 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-24 h-24 flex items-center justify-center bg-gray-200 rounded-full text-3xl font-bold text-gray-700">
+                        <div className="w-24 h-24 flex items-center justify-center bg-gray-200 rounded-full text-base font-bold text-gray-700">
                           {formData.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                       )}
@@ -194,11 +191,11 @@ const Settings: React.FC = () => {
                         htmlFor="profile-photo"
                         className="absolute bottom-0 right-0 w-8 h-8 bg-[#1A2A3A] flex items-center justify-center rounded-full hover:bg-[#2F2F2F] transition-colors cursor-pointer border-2 border-white"
                       >
-                        <i className="ri-camera-line text-sm text-white"></i>
+                        <i className="ri-camera-line text-xs text-white"></i>
                       </label>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-[#1A2A3A] mb-1">Profile Photo</h3>
+                      <h3 className="text-xs font-medium text-[#1A2A3A] mb-1">Profile Photo</h3>
                       <p className="text-xs text-gray-500">JPG, PNG or GIF. Max size 2MB</p>
                     </div>
                   </div>
@@ -206,45 +203,45 @@ const Settings: React.FC = () => {
                   {/* Form Fields */}
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Full Name</label>
+                      <label className="block text-xs font-medium text-[#1A2A3A] mb-2">Full Name</label>
                       <input 
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                         type="text"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Email</label>
+                      <label className="block text-xs font-medium text-[#1A2A3A] mb-2">Email</label>
                       <input 
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50"
                         type="email"
                         value={user?.email || ''}
                         disabled
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Phone</label>
+                      <label className="block text-xs font-medium text-[#1A2A3A] mb-2">Phone</label>
                       <input 
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                         type="tel"
                         value={formData.phoneNumber}
                         onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Business Name</label>
+                      <label className="block text-xs font-medium text-[#1A2A3A] mb-2">Business Name</label>
                       <input 
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                         type="text"
                         value={formData.businessName}
                         onChange={(e) => handleInputChange('businessName', e.target.value)}
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Business Address</label>
+                      <label className="block text-xs font-medium text-[#1A2A3A] mb-2">Business Address</label>
                       <input 
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                         type="text"
                         value={formData.businessAddress}
                         onChange={(e) => handleInputChange('businessAddress', e.target.value)}
@@ -257,7 +254,7 @@ const Settings: React.FC = () => {
                     <button 
                       onClick={handleSave}
                       disabled={saving}
-                      className="px-6 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                      className="px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                     >
                       {saving ? (
                         <>
@@ -274,8 +271,8 @@ const Settings: React.FC = () => {
 
               {activeTab === 'Billing' && user && (
                 <div className="bg-white border border-gray-200 rounded-xl p-8">
-                  <h2 className="text-xl font-bold text-[#1A2A3A] mb-2">Subscription Plan</h2>
-                  <p className="text-sm text-gray-600 mb-6">Manage your subscription and billing</p>
+                  <h2 className="text-base font-bold text-[#1A2A3A] mb-2">Subscription Plan</h2>
+                  <p className="text-xs text-gray-600 mb-6">Manage your subscription and billing</p>
                   
                   <div className="grid md:grid-cols-3 gap-6">
                     {plans.map((plan) => {
@@ -301,7 +298,7 @@ const Settings: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          <h3 className={`text-lg font-bold mb-2 ${isCurrentPlan ? 'text-green-800' : 'text-[#1A2A3A]'}`}>{plan.name}</h3>
+                          <h3 className={`text-base font-bold mb-2 ${isCurrentPlan ? 'text-green-800' : 'text-[#1A2A3A]'}`}>{plan.name}</h3>
                           <p className={`text-sm mb-4 ${isCurrentPlan ? 'text-green-700' : 'text-gray-600'}`}>{plan.description}</p>
                           
                           {isCurrentPlan && user.subscriptionPlan?.subscriptionEndDate && (
@@ -321,14 +318,14 @@ const Settings: React.FC = () => {
                           {isCurrentPlan ? null : isLowerPlan ? (
                             <button 
                               disabled
-                              className="w-full px-4 py-3 bg-gray-200 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed"
+                              className="w-full px-4 py-2 bg-gray-200 text-gray-500 text-xs font-medium rounded-lg cursor-not-allowed"
                             >
                               Lower Plan
                             </button>
                           ) : (
                             <button 
                               onClick={() => openPlanModal(plan)}
-                              className="w-full px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
+                              className="w-full px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
                             >
                               Upgrade to {plan.name}
                             </button>
@@ -342,9 +339,9 @@ const Settings: React.FC = () => {
 
               {activeTab !== 'Profile' && activeTab !== 'Billing' && (
                 <div className="bg-white border border-gray-200 rounded-xl p-8">
-                  <div className="text-center py-12">
+                  <div className="text-center py-8">
                     <i className={`${tabs.find(t => t.key === activeTab)?.icon} text-6xl text-gray-300 mb-4`}></i>
-                    <h3 className="text-xl font-bold text-[#1A2A3A] mb-2">
+                    <h3 className="text-base font-bold text-[#1A2A3A] mb-2">
                       {activeTab} Settings
                     </h3>
                     <p className="text-gray-600">This section is under development.</p>
@@ -361,18 +358,18 @@ const Settings: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
             <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-6">
-              <i className="ri-scissors-cut-line text-3xl text-[#1A2A3A]"></i>
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
-            <h2 className="text-2xl font-bold text-[#1A2A3A] text-center mb-3">Upgrade Subscription Plan</h2>
-            <p className="text-sm text-gray-600 text-center mb-4">
+            <h2 className="text-base font-bold text-[#1A2A3A] text-center mb-3">Upgrade Subscription Plan</h2>
+            <p className="text-xs text-gray-600 text-center mb-4">
               You are upgrading to the <span className="font-semibold text-[#1A2A3A]">{selectedPlan.name}</span> plan.
             </p>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-[#1A2A3A] mb-2 text-left">Subscription Duration</label>
+              <label className="block text-xs font-medium text-[#1A2A3A] mb-2 text-left">Subscription Duration</label>
               <select
                 value={months}
                 onChange={(e) => setMonths(Number(e.target.value))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
               >
                 <option value={1}>1 Month</option>
                 <option value={3}>3 Months</option>
@@ -387,14 +384,14 @@ const Settings: React.FC = () => {
                   setSelectedPlan(null);
                 }}
                 disabled={updatingPlan}
-                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button 
                 onClick={handlePlanChange}
                 disabled={updatingPlan}
-                className="flex-1 px-6 py-3 bg-[#1A2A3A] text-white text-sm font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 px-4 py-2 bg-[#1A2A3A] text-white text-xs font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
               >
                 {updatingPlan ? (
                   <i className="ri-loader-4-line animate-spin text-lg"></i>

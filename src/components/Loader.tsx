@@ -23,7 +23,7 @@ const Loader: React.FC<LoaderProps> = ({ size = 'md', text }) => {
       <div className="relative">
         {/* Rotating scissors */}
         <div className={`${sizeClasses[size]} relative animate-spin`} style={{ animationDuration: '2s' }}>
-          <i className="ri-scissors-cut-line text-[#1A2A3A] absolute inset-0 flex items-center justify-center text-3xl"></i>
+          <i className="ri-scissors-cut-line text-[#1A2A3A] absolute inset-0 flex items-center justify-center text-2xl"></i>
         </div>
         
         {/* Pulsing circle behind */}

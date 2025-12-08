@@ -77,7 +77,7 @@ const AppointmentDetails: React.FC = () => {
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           <button 
             onClick={() => navigate('/appointments')}
-            className="flex items-center space-x-2 text-[#2F2F2F] hover:text-[#1A2A3A] mb-6 transition-colors"
+            className="flex items-center space-x-2 text-[#2F2F2F] hover:text-[#1A2A3A] mb-4 transition-colors"
           >
             <i className="ri-arrow-left-line text-xl"></i>
             <span className="text-sm font-medium">Back to Appointments</span>
@@ -87,7 +87,7 @@ const AppointmentDetails: React.FC = () => {
             <div className="p-8">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#1A2A3A] mb-2">{appointment.type}</h2>
+                  <h2 className="text-lg font-bold text-[#1A2A3A] mb-2">{appointment.type}</h2>
                   <p className="text-sm text-gray-500">Appointment ID: {appointment.id.substring(0, 8)}</p>
                 </div>
                 <span className={`px-4 py-2 text-sm font-medium rounded-full border ${getStatusColor(appointment.status)}`}>
@@ -109,7 +109,7 @@ const AppointmentDetails: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-xs text-gray-600 mb-1">Client Name</p>
-                        <p className="text-sm font-semibold text-[#1A2A3A]">{appointment.client.name}</p>
+                        <p className="text-xs font-semibold text-[#1A2A3A]">{appointment.client.name}</p>
                       </div>
                     </div>
 
@@ -231,7 +231,7 @@ const AppointmentDetails: React.FC = () => {
             <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mx-auto mb-4">
               <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
-            <h2 className="text-xl font-semibold text-[#1A2A3A] text-center mb-2">Delete Appointment</h2>
+            <h2 className="text-xs font-semibold text-[#1A2A3A] text-center mb-2">Delete Appointment</h2>
             <p className="text-sm text-gray-600 text-center mb-6">
               Are you sure you want to delete this appointment? This action cannot be undone.
             </p>

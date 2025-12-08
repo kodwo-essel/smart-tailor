@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { authService, notificationService } from '../services';
+import websocketService from '../services/websocket.service';
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void;
@@ -15,6 +16,14 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen, title, subtitle }) => {
     const userData = authService.getUser();
     setUser(userData);
     fetchUnreadCount();
+    
+    websocketService.connect(() => {
+      fetchUnreadCount();
+    });
+
+    return () => {
+      websocketService.disconnect();
+    };
   }, []);
 
   const fetchUnreadCount = async () => {
@@ -36,14 +45,14 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen, title, subtitle }) => {
           <i className="ri-menu-line text-2xl text-[#1A2A3A]"></i>
         </button>
         <div>
-          <h1 className="text-xl font-semibold text-[#1A2A3A]">{title}</h1>
+          <h1 className="text-xs font-semibold text-[#1A2A3A]">{title}</h1>
         </div>
       </div>
       <div className="flex items-center space-x-4">
         <a href="/notifications" className="w-10 h-10 flex items-center justify-center hover:bg-gray-50 rounded-lg transition-colors relative">
           <i className="ri-notification-line text-2xl text-gray-700"></i>
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 px-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+            <span className="absolute top-0 right-0 px-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold leading-none">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}

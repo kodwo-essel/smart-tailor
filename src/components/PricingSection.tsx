@@ -80,7 +80,7 @@ export default function PricingSection() {
                   MOST POPULAR
                 </div>
               )}
-              <h3 className="text-2xl font-bold text-[#1A2A3A] mb-2" style={{ fontFamily: '"Russo One", sans-serif' }}>
+              <h3 className="text-lg font-bold text-[#1A2A3A] mb-2" style={{ fontFamily: '"Russo One", sans-serif' }}>
                 {plan.name}
               </h3>
               <p className="text-sm text-[#2F2F2F] mb-6">{plan.subtitle}</p>
@@ -91,7 +91,7 @@ export default function PricingSection() {
                 <span className="text-base text-[#2F2F2F] ml-2">{plan.period}</span>
               </div>
               <button
-                className={`block w-full px-6 py-4 text-base font-bold rounded-lg transition-colors whitespace-nowrap mb-8 text-center ${plan.buttonStyle}`}
+                className={`block w-full px-6 py-4 text-base font-bold rounded-lg transition-colors whitespace-nowrap mb-4 text-center ${plan.buttonStyle}`}
                 style={{ fontFamily: '"Russo One", sans-serif' }}
               >
                 {plan.buttonText}
