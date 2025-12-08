@@ -3,6 +3,23 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
 import { appointmentService, Appointment, clientService, Client, authService } from '../services';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarUI } from '@/components/ui/calendar';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 const Calendar: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -287,34 +304,44 @@ const Calendar: React.FC = () => {
             
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-3 mt-8 mb-4">
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 0))}
-                  disabled={currentPage === 0}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 text-sm border rounded-lg ${
-                      currentPage === page 
-                        ? 'bg-[#1A2A3A] text-white border-[#1A2A3A]' 
-                        : 'border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page + 1}
-                  </button>
-                ))}
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages - 1))}
-                  disabled={currentPage === totalPages - 1}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
+              <div className="mt-8 mb-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => currentPage > 0 && setCurrentPage(prev => prev - 1)}
+                        className={currentPage === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i).map(page => {
+                      if (totalPages <= 7 || page === 0 || page === totalPages - 1 || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    })}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => currentPage < totalPages - 1 && setCurrentPage(prev => prev + 1)}
+                        className={currentPage === totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </div>
@@ -366,43 +393,23 @@ const Calendar: React.FC = () => {
 
       {/* Modern Add/Edit Appointment Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => setShowModal(false)}
-            ></div>
+        <Dialog open={true} onOpenChange={() => setShowModal(false)}>
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingAppointment ? 'Edit Appointment' : 'New Appointment'}</DialogTitle>
+              <DialogDescription>
+                {editingAppointment ? 'Update appointment details' : 'Schedule a new appointment with your client'}
+              </DialogDescription>
+            </DialogHeader>
             
-            {/* Modal panel */}
-            <div className="relative transform rounded-2xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 overflow-y-auto max-h-[90vh]">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-[#1A2A3A]">
-                    {editingAppointment ? 'Edit Appointment' : 'New Appointment'}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {editingAppointment ? 'Update appointment details' : 'Schedule a new appointment with your client'}
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setShowModal(false)}
-                  className="rounded-full p-2 hover:bg-gray-100 transition-colors"
-                >
-                  <i className="ri-close-line text-xl text-gray-400"></i>
-                </button>
-              </div>
-              
-              <AppointmentForm 
-                appointment={editingAppointment}
-                clients={clients}
-                onSave={handleSaveAppointment}
-                onCancel={() => setShowModal(false)}
-              />
-            </div>
-          </div>
-        </div>
+            <AppointmentForm 
+              appointment={editingAppointment}
+              clients={clients}
+              onSave={handleSaveAppointment}
+              onCancel={() => setShowModal(false)}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
@@ -423,6 +430,9 @@ const AppointmentForm: React.FC<{
     status: appointment?.status || 'PENDING',
     notes: appointment?.notes || ''
   });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    appointment?.appointmentDate ? new Date(appointment.appointmentDate) : undefined
+  );
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -463,84 +473,86 @@ const AppointmentForm: React.FC<{
         </div>
       )}
       
-      {/* Client Selection */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-900">Client</label>
-        <div className="relative">
-          <i className="ri-user-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          <select
-            value={formData.clientId}
-            onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all appearance-none"
-            required
-          >
-            <option value="">Select a client</option>
+        <Label htmlFor="client">Client</Label>
+        <Select value={formData.clientId} onValueChange={(value) => setFormData({ ...formData, clientId: value })} required>
+          <SelectTrigger id="client">
+            <SelectValue placeholder="Select a client" />
+          </SelectTrigger>
+          <SelectContent>
             {clients.map(client => (
-              <option key={client.id} value={client.id}>{client.name}</option>
+              <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
             ))}
-          </select>
-        </div>
+          </SelectContent>
+        </Select>
       </div>
       
-      {/* Appointment Type */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-900">Appointment Type</label>
-        <select
-          value={formData.type}
-          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-          required
-        >
-          {appointmentTypes.map((type) => (
-            <option key={type.value} value={type.value}>{type.label}</option>
-          ))}
-        </select>
+        <Label htmlFor="type">Appointment Type</Label>
+        <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })} required>
+          <SelectTrigger id="type">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {appointmentTypes.map((type) => (
+              <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
-      {/* Date & Time */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Date</label>
-          <div className="relative">
-            <i className="ri-calendar-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input
-              type="date"
-              value={formData.appointmentDate}
-              onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-              required
-            />
-          </div>
+      <div className="flex gap-4">
+        <div className="flex flex-col gap-2 flex-1">
+          <Label htmlFor="date-picker">Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="date-picker"
+                className="justify-between font-normal"
+              >
+                {selectedDate ? selectedDate.toLocaleDateString() : "Select date"}
+                <i className="ri-arrow-down-s-line" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+              <CalendarUI
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setFormData({ ...formData, appointmentDate: date ? date.toISOString().split('T')[0] : '' });
+                }}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
         
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Time</label>
-          <div className="relative">
-            <i className="ri-time-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input
-              type="time"
-              value={formData.appointmentTime}
-              onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-              required
-            />
-          </div>
+        <div className="flex flex-col gap-2 flex-1">
+          <Label htmlFor="time-picker">Time</Label>
+          <Input
+            type="time"
+            id="time-picker"
+            value={formData.appointmentTime}
+            onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
+            className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+            required
+          />
         </div>
       </div>
       
-      {/* Status */}
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-gray-900">Status</label>
+        <Label>Status</Label>
         <div className="flex flex-wrap gap-2">
           {statuses.map((status) => (
             <button
               key={status.value}
               type="button"
               onClick={() => setFormData({ ...formData, status: status.value })}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
                 formData.status === status.value
                   ? status.color
-                  : 'bg-gray-100 text-gray-600 border-transparent hover:bg-gray-200'
+                  : 'bg-background border-input hover:bg-gray-50'
               }`}
             >
               {status.label}
@@ -549,41 +561,31 @@ const AppointmentForm: React.FC<{
         </div>
       </div>
       
-      {/* Notes */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-900">Notes</label>
-        <textarea
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent resize-none transition-all"
           placeholder="Add any additional notes or special requirements..."
         />
       </div>
       
-      {/* Action Buttons */}
-      <div className="flex space-x-3 pt-6 border-t border-gray-100">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
-        >
+      <div className="flex space-x-3 pt-6 border-t">
+        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="flex-1 px-6 py-3 bg-[#1A2A3A] text-white font-medium rounded-xl hover:bg-[#2F2F2F] transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        </Button>
+        <Button type="submit" disabled={submitting} className="flex-1">
           {submitting ? (
             <i className="ri-loader-4-line animate-spin text-lg"></i>
           ) : (
             <>
-              <i className={`${appointment ? 'ri-save-line' : 'ri-add-line'} text-lg`}></i>
-              <span>{appointment ? 'Update' : 'Create'}</span>
+              <i className={`${appointment ? 'ri-save-line' : 'ri-add-line'} text-lg mr-2`}></i>
+              {appointment ? 'Update' : 'Create'}
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

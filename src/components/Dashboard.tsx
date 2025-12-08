@@ -5,10 +5,12 @@ import Loader from './Loader';
 import { orderService, appointmentService, userService } from '../services';
 import apiService from '../services/api.service';
 import { API_ENDPOINTS } from '../config/api';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statistics, setStatistics] = useState<any>(null);
+  const [revenueTrend, setRevenueTrend] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,7 @@ const Dashboard: React.FC = () => {
       
       const promises = [
         apiService.get(API_ENDPOINTS.STATISTICS),
+        apiService.get('/api/statistics/revenue-trend'),
         orderService.getAll()
       ];
       
@@ -36,9 +39,10 @@ const Dashboard: React.FC = () => {
       const results = await Promise.allSettled(promises);
       
       if (results[0].status === 'fulfilled') setStatistics(results[0].value);
-      if (results[1].status === 'fulfilled') setOrders(results[1].value);
-      if (user.subscriptionPlan?.name !== 'FREE' && results[2]?.status === 'fulfilled') {
-        setAppointments(results[2].value.content);
+      if (results[1].status === 'fulfilled') setRevenueTrend(results[1].value);
+      if (results[2].status === 'fulfilled') setOrders(results[2].value);
+      if (user.subscriptionPlan?.name !== 'FREE' && results[3]?.status === 'fulfilled') {
+        setAppointments(results[3].value.content);
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -61,10 +65,10 @@ const Dashboard: React.FC = () => {
   console.log('User plan:', userPlan);
 
   const stats = [
-    { icon: 'ri-user-line', value: statistics?.totalClients?.toString() || '0', label: 'Total Clients', change: statistics ? `${statistics.clientsGrowthPercentage >= 0 ? '+' : ''}${statistics.clientsGrowthPercentage}%` : '+0%' },
-    { icon: 'ri-shopping-bag-line', value: statistics?.pendingOrders?.toString() || '0', label: 'Pending Orders', change: statistics ? `${statistics.pendingOrdersChange >= 0 ? '+' : ''}${statistics.pendingOrdersChange}` : '+0' },
-    { icon: 'ri-checkbox-circle-line', value: statistics?.completedThisMonth?.toString() || '0', label: 'Completed This Month', change: statistics ? `${statistics.completedGrowthPercentage >= 0 ? '+' : ''}${statistics.completedGrowthPercentage}%` : '+0%' },
-    { icon: 'ri-money-dollar-circle-line', value: `$${statistics?.revenueThisMonth?.toLocaleString() || '0'}`, label: 'Revenue This Month', change: statistics ? `${statistics.revenueGrowthPercentage >= 0 ? '+' : ''}${statistics.revenueGrowthPercentage}%` : '+0%' }
+    { icon: 'ri-user-line', value: statistics?.totalClients?.toString() || '0', label: 'Total Clients', change: statistics ? `${statistics.clientsGrowthPercentage >= 0 ? '+' : ''}${statistics.clientsGrowthPercentage}%` : '+0%', trend: statistics?.clientsTrend || [] },
+    { icon: 'ri-shopping-bag-line', value: statistics?.pendingOrders?.toString() || '0', label: 'Pending Orders', change: statistics ? `${statistics.pendingOrdersChange >= 0 ? '+' : ''}${statistics.pendingOrdersChange}` : '+0', trend: statistics?.pendingOrdersTrend || [] },
+    { icon: 'ri-checkbox-circle-line', value: statistics?.completedThisMonth?.toString() || '0', label: 'Completed This Month', change: statistics ? `${statistics.completedGrowthPercentage >= 0 ? '+' : ''}${statistics.completedGrowthPercentage}%` : '+0%', trend: statistics?.completedTrend || [] },
+    { icon: 'ri-money-dollar-circle-line', value: `$${statistics?.revenueThisMonth?.toLocaleString() || '0'}`, label: 'Revenue This Month', change: statistics ? `${statistics.revenueGrowthPercentage >= 0 ? '+' : ''}${statistics.revenueGrowthPercentage}%` : '+0%', trend: statistics?.revenueTrend || [] }
   ];
 
   console.log('Stats array:', stats);
@@ -100,21 +104,94 @@ const Dashboard: React.FC = () => {
               <Loader size="md" text="Loading dashboard..." />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {stats.map((stat, index) => {
                 const isNegative = stat.change.startsWith('-');
+                const trendData = stat.trend.map((value: number) => ({ value }));
                 return (
-                  <div key={index} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between mb-3">
+                  <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <i className={`${stat.icon} text-xl text-gray-400`}></i>
                       <span className={`text-xs font-medium ${isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>
                     </div>
-                    <h3 className="text-2xl font-semibold text-[#1A2A3A] mb-1">{stat.value}</h3>
-                    <p className="text-xs text-gray-600">{stat.label}</p>
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <h3 className="text-2xl font-bold text-[#1A2A3A]">{stat.value}</h3>
+                        <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+                      </div>
+                      <div className="w-20 h-12">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={trendData}>
+                            <Line 
+                              type="monotone" 
+                              dataKey="value" 
+                              stroke={isNegative ? '#ef4444' : '#22c55e'} 
+                              strokeWidth={2} 
+                              dot={false}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
             </div>
           )}
+
+          {/* Charts */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            {/* Revenue Chart */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h2 className="text-base font-semibold text-[#1A2A3A] mb-4">Revenue Overview</h2>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={revenueTrend?.monthlyData?.map((item: any) => ({
+                  month: item.month.substring(0, 3),
+                  revenue: item.revenue
+                })) || []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="month" stroke="#666" style={{ fontSize: '12px' }} />
+                  <YAxis stroke="#666" style={{ fontSize: '12px' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+                  <Line type="monotone" dataKey="revenue" stroke="#1A2A3A" strokeWidth={2} dot={{ fill: '#1A2A3A', r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Orders Status Chart */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h2 className="text-base font-semibold text-[#1A2A3A] mb-4">Orders by Status</h2>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Pending', value: statistics?.pendingOrdersCount || 0, color: '#eab308' },
+                      { name: 'In Progress', value: statistics?.inProgressOrders || 0, color: '#3b82f6' },
+                      { name: 'Completed', value: statistics?.completedOrders || 0, color: '#22c55e' },
+                      { name: 'Cancelled', value: statistics?.canceledOrders || 0, color: '#ef4444' },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {[
+                      { name: 'Pending', value: statistics?.pendingOrdersCount || 0, color: '#eab308' },
+                      { name: 'In Progress', value: statistics?.inProgressOrders || 0, color: '#3b82f6' },
+                      { name: 'Completed', value: statistics?.completedOrders || 0, color: '#22c55e' },
+                      { name: 'Cancelled', value: statistics?.canceledOrders || 0, color: '#ef4444' },
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
           {/* Recent Orders & Appointments */}
           <div className={`grid ${userPlan?.name === 'FREE' ? 'lg:grid-cols-1' : 'lg:grid-cols-3'} gap-8 mb-12`}>

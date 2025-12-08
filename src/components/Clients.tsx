@@ -3,6 +3,20 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
 import { clientService, Client } from '../services';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 const Clients: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -18,12 +32,25 @@ const Clients: React.FC = () => {
     email: '',
     notes: ''
   });
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deletingClient, setDeletingClient] = useState<Client | null>(null);
   const [deleting, setDeleting] = useState(false);
   const itemsPerPage = 5;
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     fetchClients();
@@ -81,6 +108,7 @@ const Clients: React.FC = () => {
       email: client.email,
       notes: client.notes || ''
     });
+    setProfileImage(null);
     setError('');
     setShowModal(true);
   };
@@ -88,6 +116,7 @@ const Clients: React.FC = () => {
   const openAddModal = () => {
     setEditingClient(null);
     setNewClient({ name: '', phoneNumber: '', email: '', notes: '' });
+    setProfileImage(null);
     setError('');
     setShowModal(true);
   };
@@ -227,34 +256,44 @@ const Clients: React.FC = () => {
             
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-3 mt-8 mb-4">
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 text-sm border rounded-lg ${
-                      currentPage === page 
-                        ? 'bg-[#1A2A3A] text-white border-[#1A2A3A]' 
-                        : 'border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
+              <div className="mt-8 mb-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => currentPage > 1 && setCurrentPage(prev => prev - 1)}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                      if (totalPages <= 7 || page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    })}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => currentPage < totalPages && setCurrentPage(prev => prev + 1)}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </div>
@@ -271,17 +310,14 @@ const Clients: React.FC = () => {
 
       {/* Add Client Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-[#1A2A3A]">{editingClient ? 'Edit Client' : 'Add New Client'}</h2>
-              <button 
-                onClick={() => setShowModal(false)}
-                className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <i className="ri-close-line text-xl text-gray-600"></i>
-              </button>
-            </div>
+        <Dialog open={true} onOpenChange={() => setShowModal(false)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{editingClient ? 'Edit Client' : 'Add New Client'}</DialogTitle>
+              <DialogDescription>
+                {editingClient ? 'Update client information' : 'Add a new client to your system'}
+              </DialogDescription>
+            </DialogHeader>
             
             <form onSubmit={handleAddClient} className="space-y-4">
               {error && (
@@ -290,76 +326,97 @@ const Clients: React.FC = () => {
                 </div>
               )}
               
-              <div>
-                <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Full Name</label>
-                <input 
-                  type="text"
+              <div className="flex justify-center">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                    {profileImage ? (
+                      <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : editingClient ? (
+                      <span className="text-2xl font-bold text-gray-600">
+                        {editingClient.name.charAt(0).toUpperCase()}
+                      </span>
+                    ) : (
+                      <i className="ri-user-line text-3xl text-gray-400"></i>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 w-7 h-7 bg-[#1A2A3A] text-white rounded-full flex items-center justify-center hover:bg-[#2F2F2F] transition-colors"
+                  >
+                    <i className="ri-camera-line text-sm"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
                   required
                   value={newClient.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                   placeholder="Enter client's full name"
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Phone Number</label>
-                <input 
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
                   type="tel"
                   required
                   value={newClient.phoneNumber}
                   onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                   placeholder="+1234567890"
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Email</label>
-                <input 
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
                   type="email"
                   required
                   value={newClient.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                   placeholder="client@email.com"
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Notes</label>
-                <textarea 
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
                   rows={3}
                   value={newClient.notes}
                   onChange={(e) => handleInputChange('notes', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] resize-none"
                   placeholder="Preferences, allergies, etc."
-                ></textarea>
+                />
               </div>
               
               <div className="flex items-center space-x-3 pt-4">
-                <button 
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                >
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)} className="flex-1">
                   Cancel
-                </button>
-                <button 
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
+                </Button>
+                <Button type="submit" disabled={submitting} className="flex-1">
                   {submitting ? (
                     <i className="ri-loader-4-line animate-spin text-lg"></i>
                   ) : (
                     editingClient ? 'Update Client' : 'Add Client'
                   )}
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Delete Confirmation Modal */}

@@ -97,7 +97,6 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
               <button 
                 onClick={() => setShowLogoutModal(true)}
                 className="w-8 h-8 flex items-center justify-center hover:bg-[#F7F6F3] rounded-lg transition-colors group relative"
-                title="Logout"
               >
                 <i className="ri-logout-box-r-line text-lg text-[#2F2F2F]"></i>
                 <div className="fixed left-20 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[100] pointer-events-none" style={{ top: 'calc(100vh - 5rem)' }}>

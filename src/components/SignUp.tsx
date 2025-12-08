@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TypewriterText from './TypewriterText';
+import { useToast } from './ToastContainer';
+import { authService } from '../services';
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
     businessName: '',
@@ -14,10 +19,29 @@ export default function SignUp() {
     terms: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign up logic here
-    console.log('Sign up:', formData);
+    
+    if (formData.password !== formData.confirmPassword) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await authService.register({
+        name: formData.fullName,
+        businessName: formData.businessName,
+        email: formData.email,
+        password: formData.password
+      });
+      showToast('Account created successfully! Redirecting...', 'success');
+      setTimeout(() => navigate('/signin'), 1500);
+    } catch (err: any) {
+      showToast(err.message || 'Registration failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -195,10 +219,18 @@ export default function SignUp() {
 
             <button
               type="submit"
-              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors"
+              disabled={loading}
+              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               style={{ fontFamily: '"Russo One", sans-serif' }}
             >
-              Create Account
+              {loading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin text-xl mr-2"></i>
+                  Creating account...
+                </>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
 

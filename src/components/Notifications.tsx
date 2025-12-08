@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { notificationService, Notification } from '../services';
+import websocketService from '../services/websocket.service';
 
 const Notifications: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -11,6 +12,14 @@ const Notifications: React.FC = () => {
 
   useEffect(() => {
     fetchNotifications();
+    
+    websocketService.connect((notification) => {
+      setNotifications(prev => [notification, ...prev]);
+    });
+    
+    return () => {
+      websocketService.disconnect();
+    };
   }, []);
 
   const fetchNotifications = async () => {

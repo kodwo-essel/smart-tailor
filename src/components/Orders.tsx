@@ -1,10 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
 import { orderService, Order, clientService } from '../services';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const Orders: React.FC = () => {
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -18,6 +36,15 @@ const Orders: React.FC = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    const state = location.state as { editOrder?: Order };
+    if (state?.editOrder) {
+      setEditingOrder(state.editOrder);
+      setShowModal(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const fetchOrders = async () => {
     try {
@@ -225,34 +252,44 @@ const Orders: React.FC = () => {
             
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-3 mt-8 mb-4">
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 text-sm border rounded-lg ${
-                      currentPage === page 
-                        ? 'bg-[#1A2A3A] text-white border-[#1A2A3A]' 
-                        : 'border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button 
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                </button>
+              <div className="mt-8 mb-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => currentPage > 1 && setCurrentPage(prev => prev - 1)}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                      if (totalPages <= 7 || page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    })}
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => currentPage < totalPages && setCurrentPage(prev => prev + 1)}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             )}
           </div>
@@ -272,38 +309,24 @@ const Orders: React.FC = () => {
 
       {/* Create Order Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <div 
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => setShowModal(false)}
-            ></div>
-            
-            <div className="relative transform overflow-hidden rounded-2xl bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-[#1A2A3A]">{editingOrder ? 'Edit Order' : 'Create New Order'}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{editingOrder ? 'Update order details' : 'Start a new order for your client'}</p>
-                </div>
-                <button 
-                  onClick={() => setShowModal(false)}
-                  className="rounded-full p-2 hover:bg-gray-100 transition-colors"
-                >
-                  <i className="ri-close-line text-xl text-gray-400"></i>
-                </button>
-              </div>
-              
-              <OrderForm 
-                order={editingOrder}
-                onSave={editingOrder ? handleEditOrder : handleCreateOrder} 
-                onCancel={() => {
-                  setShowModal(false);
-                  setEditingOrder(null);
-                }} 
-              />
-            </div>
-          </div>
-        </div>
+        <Dialog open={true} onOpenChange={() => setShowModal(false)}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{editingOrder ? 'Edit Order' : 'Create New Order'}</DialogTitle>
+              <DialogDescription>
+                {editingOrder ? 'Update order details' : 'Start a new order for your client'}
+              </DialogDescription>
+            </DialogHeader>
+            <OrderForm 
+              order={editingOrder}
+              onSave={editingOrder ? handleEditOrder : handleCreateOrder} 
+              onCancel={() => {
+                setShowModal(false);
+                setEditingOrder(null);
+              }} 
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
@@ -326,7 +349,7 @@ const OrderForm: React.FC<{
     template: order?.measurement.type || '',
     measurementId: order?.measurement.id || '',
     status: order?.status || 'PENDING',
-    dueDate: order?.dueDate ? new Date(order.dueDate).toISOString().split('T')[0] : getDefaultDueDate(),
+    dueDate: order?.dueDate ? new Date(order.dueDate) : new Date(getDefaultDueDate()),
     amount: order?.price ? `$${order.price}` : '',
     notes: order?.notes || ''
   });
@@ -379,7 +402,7 @@ const OrderForm: React.FC<{
       const submitData: any = {
         name: formData.item,
         status: formData.status,
-        dueDate: formData.dueDate,
+        dueDate: formData.dueDate.toISOString().split('T')[0],
         price: parseFloat(formData.amount.replace('$', '')),
         notes: formData.notes
       };
@@ -401,99 +424,93 @@ const OrderForm: React.FC<{
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Client</label>
-          <select
-            value={formData.client}
-            onChange={(e) => setFormData({ ...formData, client: e.target.value, measurementId: '', template: '' })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-            required
-          >
-            <option value="">Select a client</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.name}>{client.name}</option>
-            ))}
-          </select>
+          <Label>Client</Label>
+          <Select value={formData.client} onValueChange={(value) => setFormData({ ...formData, client: value, measurementId: '', template: '' })} required>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a client" />
+            </SelectTrigger>
+            <SelectContent>
+              {clients.map((client) => (
+                <SelectItem key={client.id} value={client.name}>{client.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Due Date</label>
-          <input
-            type="date"
-            value={formData.dueDate}
-            onChange={(e) => setFormData({ ...formData, dueDate: new Date(e.target.value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-            required
+          <Label>Due Date</Label>
+          <DatePicker
+            date={formData.dueDate}
+            onDateChange={(date) => setFormData({ ...formData, dueDate: date || new Date() })}
           />
         </div>
       </div>
       
-      {/* Client Measurements */}
       {formData.client && (
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Select Measurement (Optional)</label>
-          <select
-            value={formData.measurementId}
-            onChange={(e) => {
-              const selectedMeasurement = measurements.find(m => m.id === e.target.value);
-              setFormData({ 
-                ...formData, 
-                measurementId: e.target.value,
-                template: selectedMeasurement?.type || ''
-              });
-            }}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-          >
-            <option value="">No measurement selected</option>
-            {measurements.map((measurement) => (
-              <option key={measurement.id} value={measurement.id}>
-                {measurement.type} - {new Date(measurement.createdAt).toLocaleDateString()}
-              </option>
-            ))}
-          </select>
+          <Label>Select Measurement (Optional)</Label>
+          <Select value={formData.measurementId} onValueChange={(value) => {
+            const selectedMeasurement = measurements.find(m => m.id === value);
+            setFormData({ 
+              ...formData, 
+              measurementId: value,
+              template: selectedMeasurement?.type || ''
+            });
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="No measurement selected" />
+            </SelectTrigger>
+            <SelectContent>
+              {measurements.map((measurement) => (
+                <SelectItem key={measurement.id} value={measurement.id}>
+                  {measurement.type} - {new Date(measurement.createdAt).toLocaleDateString()}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
       
-      {/* Garment Type */}
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-900">Garment Type</label>
-        <input
-          type="text"
+        <Label htmlFor="item">Garment Type</Label>
+        <Input
+          id="item"
           value={formData.item}
           onChange={(e) => setFormData({ ...formData, item: e.target.value })}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
           placeholder="e.g., Wedding Dress, Business Suit, Casual Shirt"
           required
         />
       </div>
       
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Status</label>
-          <select
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
-            required
-          >
-            <option value="PENDING">Pending</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELED">Canceled</option>
-          </select>
+          <Label>Status</Label>
+          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })} required>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+              <SelectItem value="COMPLETED">Completed</SelectItem>
+              <SelectItem value="CANCELED">Canceled</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-900">Amount</label>
+          <Label htmlFor="amount">Amount</Label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-            <input
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+            <Input
+              id="amount"
               type="number"
               value={formData.amount.replace('$', '')}
               onChange={(e) => setFormData({ ...formData, amount: `$${e.target.value}` })}
-              className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent transition-all"
+              className="pl-7"
               placeholder="0.00"
               required
             />
@@ -502,38 +519,30 @@ const OrderForm: React.FC<{
       </div>
       
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-900">Notes</label>
-        <textarea
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           rows={3}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent resize-none transition-all"
           placeholder="Special requirements, fabric details, etc..."
         />
       </div>
       
-      <div className="flex space-x-3 pt-6 border-t border-gray-100">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
-        >
+      <div className="flex space-x-3 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
           Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="flex-1 px-6 py-3 bg-[#1A2A3A] text-white font-medium rounded-xl hover:bg-[#2F2F2F] transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        </Button>
+        <Button type="submit" disabled={submitting} className="flex-1">
           {submitting ? (
-            <i className="ri-loader-4-line animate-spin text-lg text-white"></i>
+            <i className="ri-loader-4-line animate-spin text-lg"></i>
           ) : (
             <>
-              <i className={`${order ? 'ri-save-line' : 'ri-add-line'} text-lg`}></i>
-              <span>{order ? 'Update Order' : 'Create Order'}</span>
+              <i className={`${order ? 'ri-save-line' : 'ri-add-line'} text-lg mr-2`}></i>
+              {order ? 'Update Order' : 'Create Order'}
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

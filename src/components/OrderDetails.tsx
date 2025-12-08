@@ -88,7 +88,7 @@ const OrderDetails: React.FC = () => {
                   {order.status.replace('_', ' ')}
                 </span>
                 <button
-                  onClick={() => navigate('/orders')}
+                  onClick={() => navigate('/orders', { state: { editOrder: order } })}
                   className="px-4 py-2 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors flex items-center space-x-2"
                 >
                   <i className="ri-edit-line"></i>
@@ -139,7 +139,10 @@ const OrderDetails: React.FC = () => {
             {/* Measurements */}
             <div className="bg-white border border-gray-200 rounded-xl p-6">
               <h3 className="text-lg font-bold text-[#1A2A3A] mb-4">Measurements</h3>
-              <div className="mb-4">
+              <div className="mb-4 flex items-center gap-4">
+                {order.measurement.name && (
+                  <p className="text-sm text-gray-600">Name: <span className="font-semibold text-[#1A2A3A]">{order.measurement.name}</span></p>
+                )}
                 <p className="text-sm text-gray-600">Type: <span className="font-semibold text-[#1A2A3A]">{order.measurement.type}</span></p>
               </div>
               <div className="grid md:grid-cols-3 gap-4">

@@ -3,6 +3,21 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
 import { templateService, Template, clientService, Client, measurementService } from '../services';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 const Templates: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -303,34 +318,44 @@ const Templates: React.FC = () => {
           
           {/* Pagination */}
           {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-center space-x-3 mt-10 mb-6">
-              <button 
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 0))}
-                disabled={currentPage === 0}
-                className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-4 py-2 text-sm border rounded-lg ${
-                    currentPage === page 
-                      ? 'bg-[#1A2A3A] text-white border-[#1A2A3A]' 
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  {page + 1}
-                </button>
-              ))}
-              <button 
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages - 1))}
-                disabled={currentPage === totalPages - 1}
-                className="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
+            <div className="mt-10 mb-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 0 && setCurrentPage(prev => prev - 1)}
+                      className={currentPage === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i).map(page => {
+                    if (totalPages <= 7 || page === 0 || page === totalPages - 1 || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                          >
+                            {page + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages - 1 && setCurrentPage(prev => prev + 1)}
+                      className={currentPage === totalPages - 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </main>
@@ -513,127 +538,98 @@ const TemplateFormModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          onClick={onCancel}
-        ></div>
+    <Dialog open={true} onOpenChange={onCancel}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{template ? 'Edit Template' : 'Create Template'}</DialogTitle>
+          <DialogDescription>
+            {template ? 'Update template details' : 'Define measurement fields for your template'}
+          </DialogDescription>
+        </DialogHeader>
         
-        <div className="relative transform overflow-hidden rounded-2xl bg-white px-6 py-6 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-xl font-bold text-[#1A2A3A]">
-                {template ? 'Edit Template' : 'Create Template'}
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">
-                {template ? 'Update template details' : 'Define measurement fields for your template'}
-              </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {error}
             </div>
-            <button 
-              onClick={onCancel}
-              className="rounded-full p-2 hover:bg-gray-100 transition-colors"
-            >
-              <i className="ri-close-line text-xl text-gray-400"></i>
-            </button>
+          )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="name">Template Name</Label>
+            <Input
+              id="name"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Men's Shirt"
+            />
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {error}
-              </div>
-            )}
-            
-            <div>
-              <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Template Name</label>
-              <input 
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
-                placeholder="e.g., Men's Shirt"
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              rows={2}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Brief description of this template"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Measurement Fields</Label>
+            <div className="flex space-x-2">
+              <Input
+                value={fieldInput}
+                onChange={(e) => setFieldInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddField())}
+                placeholder="e.g., chest, waist, sleeve"
+                className="flex-1"
               />
+              <Button type="button" onClick={handleAddField}>
+                Add
+              </Button>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Description</label>
-              <textarea 
-                rows={2}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] resize-none"
-                placeholder="Brief description of this template"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Measurement Fields</label>
-              <div className="flex space-x-2 mb-3">
-                <input 
-                  type="text"
-                  value={fieldInput}
-                  onChange={(e) => setFieldInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddField())}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
-                  placeholder="e.g., chest, waist, sleeve"
-                />
-                <button 
-                  type="button"
-                  onClick={handleAddField}
-                  className="px-4 py-2 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
-                >
-                  Add
-                </button>
-              </div>
-              
-              <div className="max-h-48 overflow-y-auto space-y-2">
-                {formData.fields.length === 0 ? (
-                  <div className="text-center py-4 text-sm text-gray-500">
-                    No fields added yet
+            <div className="max-h-48 overflow-y-auto space-y-2">
+              {formData.fields.length === 0 ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  No fields added yet
+                </div>
+              ) : (
+                formData.fields.map((field, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="text-sm">{field}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveField(index)}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <i className="ri-close-line text-lg"></i>
+                    </Button>
                   </div>
-                ) : (
-                  formData.fields.map((field, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm text-gray-900">{field}</span>
-                      <button 
-                        type="button"
-                        onClick={() => handleRemoveField(index)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <i className="ri-close-line text-lg"></i>
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
+                ))
+              )}
             </div>
-            
-            <div className="flex items-center space-x-3 pt-4">
-              <button 
-                type="button"
-                onClick={onCancel}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                type="submit"
-                disabled={submitting}
-                className="flex-1 px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {submitting ? (
-                  <i className="ri-loader-4-line animate-spin text-lg"></i>
-                ) : (
-                  template ? 'Update Template' : 'Create Template'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </div>
+          
+          <div className="flex items-center space-x-3 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting} className="flex-1">
+              {submitting ? (
+                <i className="ri-loader-4-line animate-spin text-lg"></i>
+              ) : (
+                template ? 'Update Template' : 'Create Template'
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -675,112 +671,85 @@ const UseTemplateModal: React.FC<{
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-        <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          onClick={onCancel}
-        ></div>
+    <Dialog open={true} onOpenChange={onCancel}>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Use Template: {template.name}</DialogTitle>
+          <DialogDescription>Select a client and enter measurements</DialogDescription>
+        </DialogHeader>
         
-        <div className="relative transform overflow-hidden rounded-2xl bg-white px-6 py-6 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-xl font-bold text-[#1A2A3A]">Use Template: {template.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">Select a client and enter measurements</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {error}
             </div>
-            <button 
-              onClick={onCancel}
-              className="rounded-full p-2 hover:bg-gray-100 transition-colors"
-            >
-              <i className="ri-close-line text-xl text-gray-400"></i>
-            </button>
+          )}
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="client">Select Client</Label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId} required>
+                <SelectTrigger id="client">
+                  <SelectValue placeholder="Choose a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="measurementName">Measurement Name</Label>
+              <Input
+                id="measurementName"
+                value={measurementName}
+                onChange={(e) => setMeasurementName(e.target.value)}
+                placeholder={template.name}
+                required
+              />
+            </div>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {error}
-              </div>
-            )}
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Select Client</label>
-                <div className="relative">
-                  <i className="ri-user-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                  <select
-                    value={selectedClientId}
-                    onChange={(e) => setSelectedClientId(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] appearance-none"
-                    required
-                  >
-                    <option value="">Choose a client</option>
-                    {clients.map(client => (
-                      <option key={client.id} value={client.id}>{client.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-[#1A2A3A] mb-2">Measurement Name</label>
-                <input
-                  type="text"
-                  value={measurementName}
-                  onChange={(e) => setMeasurementName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
-                  placeholder={template.name}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold text-gray-900 mb-3">Measurements</h4>
-              <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                {template.fields.map((field, index) => (
-                  <div key={index}>
-                    <label className="block text-xs text-gray-700 mb-1 capitalize">{field}</label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={measurements[field] || ''}
-                        onChange={(e) => setMeasurements(prev => ({ ...prev, [field]: e.target.value }))}
-                        className="w-full px-3 py-2 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] text-sm"
-                        placeholder="0.0"
-                      />
-                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">in</span>
-                    </div>
+          <div className="space-y-2">
+            <Label>Measurements</Label>
+            <div className="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+              {template.fields.map((field, index) => (
+                <div key={index} className="space-y-1">
+                  <Label htmlFor={`field-${index}`} className="text-xs capitalize">{field}</Label>
+                  <div className="relative">
+                    <Input
+                      id={`field-${index}`}
+                      type="number"
+                      step="0.1"
+                      value={measurements[field] || ''}
+                      onChange={(e) => setMeasurements(prev => ({ ...prev, [field]: e.target.value }))}
+                      placeholder="0.0"
+                      className="pr-10"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">in</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-            
-            <div className="flex space-x-3 pt-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 px-4 py-3 bg-[#1A2A3A] text-white font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {submitting ? (
-                  <i className="ri-loader-4-line animate-spin text-lg"></i>
-                ) : (
-                  'Save Measurement'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </div>
+          
+          <div className="flex space-x-3 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting} className="flex-1">
+              {submitting ? (
+                <i className="ri-loader-4-line animate-spin text-lg"></i>
+              ) : (
+                'Save Measurement'
+              )}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

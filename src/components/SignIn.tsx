@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TypewriterText from './TypewriterText';
 import { authService } from '../services';
+import { useToast } from './ToastContainer';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,16 +18,16 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     
     try {
       await authService.login({
         email: formData.email,
         password: formData.password
       });
+      showToast('Login successful! Redirecting...', 'success');
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.');
+      showToast(err.message || 'Login failed. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -65,11 +66,6 @@ export default function SignIn() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[#1A2A3A] mb-2">Email Address</label>
               <input

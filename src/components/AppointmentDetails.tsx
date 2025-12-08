@@ -102,8 +102,8 @@ const AppointmentDetails: React.FC = () => {
                   
                   <div className="space-y-4">
                     <div className="flex items-start space-x-3">
-                      <div className="w-10 h-10 bg-[#D9C7A8] rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-sm font-bold text-[#1A2A3A]">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-bold text-gray-700">
                           {appointment.client.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -203,17 +203,17 @@ const AppointmentDetails: React.FC = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="mt-8 pt-8 border-t border-gray-200 flex items-center space-x-3">
+              <div className="mt-8 pt-8 border-t border-gray-200 flex items-center gap-3">
                 <button
                   onClick={() => navigate(`/appointments?edit=${appointment.id}`)}
-                  className="flex-1 px-4 py-3 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors flex items-center justify-center space-x-2"
+                  className="px-6 py-2.5 bg-[#1A2A3A] text-white text-sm font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors flex items-center space-x-2"
                 >
                   <i className="ri-edit-line"></i>
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="flex-1 px-4 py-3 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
+                  className="px-6 py-2.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
                 >
                   <i className="ri-delete-bin-line"></i>
                   <span>Delete</span>
