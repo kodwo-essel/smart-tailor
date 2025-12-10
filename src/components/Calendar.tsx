@@ -12,6 +12,17 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -24,7 +35,10 @@ import {
 const Calendar: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [filter, setFilter] = useState('all');
+  const [filters, setFilters] = useState({
+    date: 'all',
+    status: []
+  });
   const [showModal, setShowModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,23 +110,29 @@ const Calendar: React.FC = () => {
     
     if (!matchesSearch) return false;
     
+    // Date filtering
     const appointmentDate = new Date(appointment.appointmentDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    if (filter === 'today') {
+    let matchesDate = true;
+    if (filters.date === 'today') {
       const apptDay = new Date(appointmentDate);
       apptDay.setHours(0, 0, 0, 0);
-      return apptDay.getTime() === today.getTime();
-    }
-    
-    if (filter === 'week') {
+      matchesDate = apptDay.getTime() === today.getTime();
+    } else if (filters.date === 'week') {
       const weekFromNow = new Date(today);
       weekFromNow.setDate(today.getDate() + 7);
-      return appointmentDate >= today && appointmentDate <= weekFromNow;
+      matchesDate = appointmentDate >= today && appointmentDate <= weekFromNow;
     }
     
-    return true;
+    // Status filtering
+    let matchesStatus = true;
+    if (filters.status.length > 0) {
+      matchesStatus = filters.status.includes(appointment.status);
+    }
+    
+    return matchesDate && matchesStatus;
   });
 
   const handleAddAppointment = () => {
@@ -180,7 +200,7 @@ const Calendar: React.FC = () => {
                   <i className="ri-lock-line text-2xl text-yellow-600"></i>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-base font-bold text-[#1A2A3A] mb-2">Upgrade to Access Appointments</h3>
+                  <h3 className="text-lg font-bold text-[#1A2A3A] mb-2">Upgrade to Access Appointments</h3>
                   <p className="text-xs text-gray-700 mb-4">Appointments are not available on the FREE plan. Upgrade to STANDARD or PREMIUM to manage appointments.</p>
                   <a href="/settings" className="inline-block px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors">
                     Upgrade Plan
@@ -191,32 +211,80 @@ const Calendar: React.FC = () => {
           )}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex items-center space-x-4">
-                <button 
-                  onClick={() => setFilter('all')}
-                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    filter === 'all' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  All
-                </button>
-                <button 
-                  onClick={() => setFilter('today')}
-                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    filter === 'today' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Today
-                </button>
-                <button 
-                  onClick={() => setFilter('week')}
-                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors ${
-                    filter === 'week' ? 'bg-[#1A2A3A] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  This Week
-                </button>
-              </div>
+              {/* Compound Filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="justify-between">
+                    <span className="flex items-center gap-2">
+                      <i className="ri-filter-line text-sm"></i>
+                      Filter
+                      {(filters.date !== 'all' || filters.status.length > 0) && (
+                        <span className="bg-[#1A2A3A] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                          {(filters.date !== 'all' ? 1 : 0) + filters.status.length}
+                        </span>
+                      )}
+                    </span>
+                    <i className="ri-arrow-down-s-line text-sm"></i>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <div className="flex items-center justify-between px-2 py-1.5">
+                    <DropdownMenuLabel className="p-0">Filters</DropdownMenuLabel>
+                    {(filters.date !== 'all' || filters.status.length > 0) && (
+                      <button
+                        onClick={() => setFilters({ date: 'all', status: [] })}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
+                  <DropdownMenuLabel>Date Range</DropdownMenuLabel>
+                  <div className="space-y-1">
+                    {[{value: 'all', label: 'All Dates'}, {value: 'today', label: 'Today'}, {value: 'week', label: 'This Week'}].map((option) => (
+                      <div
+                        key={option.value}
+                        onClick={() => setFilters(prev => ({ ...prev, date: option.value }))}
+                        className="relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                          <div className={`h-2 w-2 rounded-full border ${filters.date === option.value ? 'bg-current border-current' : 'border-current'}`} />
+                        </span>
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Status</DropdownMenuLabel>
+                  <div className="space-y-1">
+                    {['PENDING', 'CONFIRMED', 'COMPLETED'].map((status) => (
+                      <div
+                        key={status}
+                        onClick={() => {
+                          setFilters(prev => ({
+                            ...prev,
+                            status: prev.status.includes(status)
+                              ? prev.status.filter(s => s !== status)
+                              : [...prev.status, status]
+                          }));
+                        }}
+                        className="relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                          {filters.status.includes(status) && (
+                            <i className="ri-check-line text-sm"></i>
+                          )}
+                        </span>
+                        {status === 'PENDING' ? 'Pending' :
+                         status === 'CONFIRMED' ? 'Confirmed' :
+                         status === 'COMPLETED' ? 'Completed' : status}
+                      </div>
+                    ))}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <div className="relative">
                 <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 <input
@@ -224,7 +292,7 @@ const Calendar: React.FC = () => {
                   placeholder="Search appointments..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent"
+                  className="w-full lg:w-auto pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent"
                 />
               </div>
             </div>
@@ -266,7 +334,10 @@ const Calendar: React.FC = () => {
                       <td className="py-3 px-4 text-xs text-gray-700 hidden lg:table-cell">{appointment.appointmentTime}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border whitespace-nowrap ${getStatusColor(appointment.status)}`}>
-                          {appointment.status}
+                          {appointment.status === 'PENDING' ? 'Pending' :
+                           appointment.status === 'CONFIRMED' ? 'Confirmed' :
+                           appointment.status === 'COMPLETED' ? 'Completed' :
+                           appointment.status === 'CANCELLED' ? 'Cancelled' : appointment.status}
                         </span>
                       </td>
                       <td className="py-3 px-4">
@@ -396,7 +467,7 @@ const Calendar: React.FC = () => {
         <Dialog open={true} onOpenChange={() => setShowModal(false)}>
           <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editingAppointment ? 'Edit Appointment' : 'New Appointment'}</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-[#1A2A3A]">{editingAppointment ? 'Edit Appointment' : 'New Appointment'}</DialogTitle>
               <DialogDescription>
                 {editingAppointment ? 'Update appointment details' : 'Schedule a new appointment with your client'}
               </DialogDescription>

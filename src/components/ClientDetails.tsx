@@ -3,7 +3,8 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
 import { useParams, useNavigate } from 'react-router-dom';
-import { clientService, Client, measurementService } from '../services';
+import { clientService, uploadService, Client, measurementService } from '../services';
+import { useToast } from './ToastContainer';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -117,10 +118,14 @@ const ClientDetails: React.FC = () => {
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-sm p-8">
                 <div className="flex flex-col items-center mb-6">
-                  <div className="w-24 h-24 flex items-center justify-center bg-gray-200 rounded-full mb-4">
-                    <span className="text-lg font-bold text-gray-700">
-                      {client.name.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="w-24 h-24 flex items-center justify-center bg-gray-200 rounded-full mb-4 overflow-hidden">
+                    {client.profileImageUrl ? (
+                      <img src={client.profileImageUrl} alt={client.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-lg font-bold text-gray-700">
+                        {client.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-lg font-bold text-[#1A2A3A] mb-2">{client.name}</h2>
                 </div>
@@ -414,7 +419,7 @@ const ClientDetails: React.FC = () => {
         <Dialog open={true} onOpenChange={() => setShowMeasurementModal(false)}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Add Measurement</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-[#1A2A3A]">Add Measurement</DialogTitle>
               <DialogDescription>For {client.name}</DialogDescription>
             </DialogHeader>
             <ClientMeasurementForm 
@@ -431,7 +436,7 @@ const ClientDetails: React.FC = () => {
         <Dialog open={true} onOpenChange={() => setEditingMeasurement(null)}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Edit Measurement</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-[#1A2A3A]">Edit Measurement</DialogTitle>
               <DialogDescription>Update measurement details</DialogDescription>
             </DialogHeader>
             <EditMeasurementForm 
@@ -532,7 +537,7 @@ const ClientDetails: React.FC = () => {
         <Dialog open={true} onOpenChange={() => setShowOrderModal(false)}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Add Order</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-[#1A2A3A]">Add Order</DialogTitle>
               <DialogDescription>For {client.name}</DialogDescription>
             </DialogHeader>
             <ClientOrderForm 
@@ -757,13 +762,16 @@ const EditClientForm: React.FC<{
   onSave: () => void;
   onCancel: () => void;
 }> = ({ client, onSave, onCancel }) => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     name: client.name,
     phoneNumber: client.phoneNumber,
     email: client.email,
     notes: client.notes || ''
   });
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(client.profileImageUrl || null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -773,7 +781,7 @@ const EditClientForm: React.FC<{
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result as string);
+        setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -785,12 +793,28 @@ const EditClientForm: React.FC<{
     setSubmitting(true);
     
     try {
-      await clientService.update(client.id, formData);
+      let imageUrl = profileImage;
+      
+      if (previewImage && !profileImage) {
+        setUploading(true);
+        const file = fileInputRef.current?.files?.[0];
+        if (file) {
+          imageUrl = await uploadService.uploadFile(file);
+        }
+        setUploading(false);
+      }
+      
+      const clientData = { ...formData, profileImageUrl: imageUrl };
+      await clientService.update(client.id, clientData);
+      showToast('Client updated successfully!', 'success');
       onSave();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update client');
+      const errorMessage = err.response?.data?.message || 'Failed to update client';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
@@ -805,7 +829,11 @@ const EditClientForm: React.FC<{
       <div className="flex justify-center">
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-            {profileImage ? (
+            {uploading ? (
+              <i className="ri-loader-4-line animate-spin text-xl text-gray-400"></i>
+            ) : previewImage ? (
+              <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+            ) : profileImage ? (
               <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <span className="text-lg font-bold text-gray-700">

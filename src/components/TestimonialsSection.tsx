@@ -48,7 +48,7 @@ export default function TestimonialsSection() {
                 "{testimonial.text}"
               </p>
               <div className="border-t border-[#F7F6F3] pt-6">
-                <h4 className="text-base font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>
+                <h4 className="text-lg font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>
                   {testimonial.name}
                 </h4>
                 <p className="text-sm text-[#2F2F2F]">{testimonial.title}</p>

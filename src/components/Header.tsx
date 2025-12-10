@@ -26,6 +26,15 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen, title, subtitle }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userData = authService.getUser();
+      setUser(userData);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const fetchUnreadCount = async () => {
     try {
       const count = await notificationService.getUnreadCount();
@@ -45,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen, title, subtitle }) => {
           <i className="ri-menu-line text-2xl text-[#1A2A3A]"></i>
         </button>
         <div>
-          <h1 className="text-xs font-semibold text-[#1A2A3A]">{title}</h1>
+          <h1 className="text-lg font-bold text-[#1A2A3A]">{title}</h1>
         </div>
       </div>
       <div className="flex items-center space-x-4">

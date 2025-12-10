@@ -29,14 +29,16 @@ export default function SignUp() {
     
     setLoading(true);
     try {
-      await authService.register({
+      await authService.signup({
         name: formData.fullName,
         businessName: formData.businessName,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        phoneNumber: '',
+        businessAddress: ''
       });
-      showToast('Account created successfully! Redirecting...', 'success');
-      setTimeout(() => navigate('/signin'), 1500);
+      showToast('Registration successful! Please check your email to verify your account.', 'success');
+      setTimeout(() => navigate('/verify-otp', { state: { email: formData.email, purpose: 'verification' } }), 1500);
     } catch (err: any) {
       showToast(err.message || 'Registration failed. Please try again.', 'error');
     } finally {

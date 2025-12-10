@@ -14,6 +14,8 @@ import AppointmentDetails from './components/AppointmentDetails';
 import Notifications from './components/Notifications';
 import ErrorPage from './components/ErrorPage';
 import PaymentCallback from './components/PaymentCallback';
+import ForgotPassword from './components/ForgotPassword';
+import OTPVerification from './components/OTPVerification';
 import { ToastProvider } from './components/ToastContainer';
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<OTPVerification />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/orders" element={<Orders />} />

@@ -33,12 +33,9 @@ export interface AuthResponse {
 }
 
 class AuthService {
-  async signup(data: SignupData): Promise<AuthResponse> {
-    const response = await apiService.post<AuthResponse>(API_ENDPOINTS.AUTH.SIGNUP, data);
-    if (response.token) {
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-    }
+  async signup(data: SignupData): Promise<any> {
+    const response = await apiService.post(API_ENDPOINTS.AUTH.SIGNUP, data);
+    // No token stored during signup - user must verify email first
     return response;
   }
 
@@ -49,6 +46,11 @@ class AuthService {
       localStorage.setItem('user', JSON.stringify(response.user));
     }
     return response;
+  }
+
+  async register(data: any): Promise<any> {
+    // Alias for backward compatibility
+    return this.signup(data);
   }
 
   logout(): void {

@@ -6,6 +6,7 @@ export { default as templateService } from './template.service';
 export { default as appointmentService } from './appointment.service';
 export { default as notificationService } from './notification.service';
 export { default as userService } from './user.service';
+export { default as uploadService } from './upload.service';
 
 export * from './auth.service';
 export * from './client.service';

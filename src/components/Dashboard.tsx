@@ -64,11 +64,17 @@ const Dashboard: React.FC = () => {
   console.log('Statistics state:', statistics);
   console.log('User plan:', userPlan);
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return num.toString();
+  };
+
   const stats = [
-    { icon: 'ri-user-line', value: statistics?.totalClients?.toString() || '0', label: 'Total Clients', change: statistics ? `${statistics.clientsGrowthPercentage >= 0 ? '+' : ''}${statistics.clientsGrowthPercentage}%` : '+0%', trend: statistics?.clientsTrend || [] },
-    { icon: 'ri-shopping-bag-line', value: statistics?.pendingOrders?.toString() || '0', label: 'Pending Orders', change: statistics ? `${statistics.pendingOrdersChange >= 0 ? '+' : ''}${statistics.pendingOrdersChange}` : '+0', trend: statistics?.pendingOrdersTrend || [] },
-    { icon: 'ri-checkbox-circle-line', value: statistics?.completedThisMonth?.toString() || '0', label: 'Completed This Month', change: statistics ? `${statistics.completedGrowthPercentage >= 0 ? '+' : ''}${statistics.completedGrowthPercentage}%` : '+0%', trend: statistics?.completedTrend || [] },
-    { icon: 'ri-money-dollar-circle-line', value: `$${statistics?.revenueThisMonth?.toLocaleString() || '0'}`, label: 'Revenue This Month', change: statistics ? `${statistics.revenueGrowthPercentage >= 0 ? '+' : ''}${statistics.revenueGrowthPercentage}%` : '+0%', trend: statistics?.revenueTrend || [] }
+    { icon: 'ri-user-line', value: formatNumber(statistics?.totalClients || 0), label: 'Total Clients', change: statistics ? `${statistics.clientsGrowthPercentage >= 0 ? '+' : ''}${statistics.clientsGrowthPercentage}%` : '+0%', trend: statistics?.clientsTrend || [] },
+    { icon: 'ri-shopping-bag-line', value: formatNumber(statistics?.pendingOrders || 0), label: 'Pending Orders', change: statistics ? `${statistics.pendingOrdersChange >= 0 ? '+' : ''}${statistics.pendingOrdersChange}` : '+0', trend: statistics?.pendingOrdersTrend || [] },
+    { icon: 'ri-checkbox-circle-line', value: formatNumber(statistics?.completedThisMonth || 0), label: 'Completed This Month', change: statistics ? `${statistics.completedGrowthPercentage >= 0 ? '+' : ''}${statistics.completedGrowthPercentage}%` : '+0%', trend: statistics?.completedTrend || [] },
+    { icon: 'ri-money-dollar-circle-line', value: `$${formatNumber(statistics?.revenueThisMonth || 0)}`, label: 'Revenue This Month', change: statistics ? `${statistics.revenueGrowthPercentage >= 0 ? '+' : ''}${statistics.revenueGrowthPercentage}%` : '+0%', trend: statistics?.revenueTrend || [] }
   ];
 
   console.log('Stats array:', stats);
@@ -104,33 +110,35 @@ const Dashboard: React.FC = () => {
               <Loader size="md" text="Loading dashboard..." />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
               {stats.map((stat, index) => {
                 const isNegative = stat.change.startsWith('-');
                 const trendData = stat.trend.map((value: number) => ({ value }));
                 return (
-                  <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div key={index} className="bg-white border border-gray-200 rounded-xl p-3 lg:p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-2">
-                      <i className={`${stat.icon} text-xl text-gray-400`}></i>
-                      <span className={`text-xs font-medium ${isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>
+                      <i className={`${stat.icon} text-lg lg:text-xl text-gray-400`}></i>
+                      <span className={`text-[10px] lg:text-xs font-medium ${isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>
                     </div>
-                    <div className="flex items-end justify-between gap-3">
+                    <div className="flex items-end justify-between gap-2 lg:gap-3">
                       <div>
-                        <h3 className="text-lg font-bold text-[#1A2A3A]">{stat.value}</h3>
-                        <p className="text-[10px] text-gray-500 mt-1">{stat.label}</p>
+                        <h3 className="text-sm lg:text-lg font-bold text-[#1A2A3A]">{stat.value}</h3>
+                        <p className="text-[10px] lg:text-xs text-gray-600 mt-1">{stat.label}</p>
                       </div>
-                      <div className="w-20 h-12">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={trendData}>
-                            <Line 
-                              type="monotone" 
-                              dataKey="value" 
-                              stroke={isNegative ? '#ef4444' : '#22c55e'} 
-                              strokeWidth={2} 
-                              dot={false}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
+                      <div className="hidden lg:block w-20 h-12">
+                        {trendData.length > 0 && (
+                          <ResponsiveContainer width={80} height={48} minWidth={80} minHeight={48}>
+                            <LineChart data={trendData}>
+                              <Line 
+                                type="monotone" 
+                                dataKey="value" 
+                                stroke={isNegative ? '#ef4444' : '#22c55e'} 
+                                strokeWidth={2} 
+                                dot={false}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
                     </div>
                   </div>

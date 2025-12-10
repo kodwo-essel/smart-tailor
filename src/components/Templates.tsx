@@ -541,7 +541,7 @@ const TemplateFormModal: React.FC<{
     <Dialog open={true} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{template ? 'Edit Template' : 'Create Template'}</DialogTitle>
+          <DialogTitle className="text-lg font-bold text-[#1A2A3A]">{template ? 'Edit Template' : 'Create Template'}</DialogTitle>
           <DialogDescription>
             {template ? 'Update template details' : 'Define measurement fields for your template'}
           </DialogDescription>
@@ -674,7 +674,7 @@ const UseTemplateModal: React.FC<{
     <Dialog open={true} onOpenChange={onCancel}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Use Template: {template.name}</DialogTitle>
+          <DialogTitle className="text-lg font-bold text-[#1A2A3A]">Use Template: {template.name}</DialogTitle>
           <DialogDescription>Select a client and enter measurements</DialogDescription>
         </DialogHeader>
         

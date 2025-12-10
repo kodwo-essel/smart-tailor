@@ -20,12 +20,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
 
 const Orders: React.FC = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilters, setActiveFilters] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
@@ -68,19 +75,31 @@ const Orders: React.FC = () => {
     return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200';
   };
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return num.toString();
+  };
+
   const totalOrders = orders.length;
   const inProgressOrders = orders.filter(o => o.status === 'IN_PROGRESS').length;
   const completedOrders = orders.filter(o => o.status === 'COMPLETED').length;
   const totalRevenue = orders.reduce((sum, o) => sum + (o.price || 0), 0);
 
   const stats = [
-    { icon: 'ri-shopping-bag-line', value: totalOrders.toString(), label: 'Total Orders', color: 'bg-[#1A2A3A]' },
-    { icon: 'ri-time-line', value: inProgressOrders.toString(), label: 'In Progress', color: 'bg-[#1A2A3A]' },
-    { icon: 'ri-checkbox-circle-line', value: completedOrders.toString(), label: 'Completed', color: 'bg-[#1A2A3A]' },
-    { icon: 'ri-money-dollar-circle-line', value: `$${totalRevenue.toLocaleString()}`, label: 'Total Revenue', color: 'bg-[#1A2A3A]' }
+    { icon: 'ri-shopping-bag-line', value: formatNumber(totalOrders), label: 'Total Orders', color: 'bg-[#1A2A3A]' },
+    { icon: 'ri-time-line', value: formatNumber(inProgressOrders), label: 'In Progress', color: 'bg-[#1A2A3A]' },
+    { icon: 'ri-checkbox-circle-line', value: formatNumber(completedOrders), label: 'Completed', color: 'bg-[#1A2A3A]' },
+    { icon: 'ri-money-dollar-circle-line', value: `$${formatNumber(totalRevenue)}`, label: 'Total Revenue', color: 'bg-[#1A2A3A]' }
   ];
 
-  const statusFilters = ['All', 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELED'];
+  const statusFilters = [
+    { value: 'All', label: 'All' },
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELED', label: 'Canceled' }
+  ];
 
 
 
@@ -124,7 +143,7 @@ const Orders: React.FC = () => {
     const matchesSearch = order.client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = activeFilter === 'All' || order.status === activeFilter;
+    const matchesFilter = activeFilters.length === 0 || activeFilters.includes(order.status);
     return matchesSearch && matchesFilter;
   });
 
@@ -145,37 +164,75 @@ const Orders: React.FC = () => {
         
         <main className="flex-1 overflow-y-auto p-6 lg:p-12">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                <h3 className="text-base font-bold text-[#1A2A3A] mb-1">{stat.value}</h3>
-                <p className="text-xs text-gray-600">{stat.label}</p>
+              <div key={index} className="bg-white border border-gray-200 rounded-xl p-3 lg:p-4 hover:shadow-md transition-shadow">
+                <h3 className="text-sm lg:text-lg font-bold text-[#1A2A3A] mb-1">{stat.value}</h3>
+                <p className="text-[10px] lg:text-xs text-gray-600">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Filters and Search */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
-            <div className="flex flex-wrap items-center gap-3">
-              {statusFilters.map((filter) => (
-                <button 
-                  key={filter}
-                  className={`px-4 py-2 text-xs font-medium rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
-                    activeFilter === filter 
-                      ? 'bg-[#1A2A3A] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  onClick={() => setActiveFilter(filter)}
-                >
-                  {filter.replace('_', ' ')}
-                </button>
-              ))}
-            </div>
-            <div className="relative">
+            {/* Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="justify-between">
+                  <span className="flex items-center gap-2">
+                    <i className="ri-filter-line text-sm"></i>
+                    Filter
+                    {activeFilters.length > 0 && (
+                      <span className="bg-[#1A2A3A] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                        {activeFilters.length}
+                      </span>
+                    )}
+                  </span>
+                  <i className="ri-arrow-down-s-line text-sm"></i>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <DropdownMenuLabel className="p-0">Status</DropdownMenuLabel>
+                  {activeFilters.length > 0 && (
+                    <button
+                      onClick={() => setActiveFilters([])}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {statusFilters.filter(f => f.value !== 'All').map((filter) => (
+                    <div
+                      key={filter.value}
+                      onClick={() => {
+                        setActiveFilters(prev => 
+                          prev.includes(filter.value)
+                            ? prev.filter(f => f !== filter.value)
+                            : [...prev, filter.value]
+                        );
+                      }}
+                      className="relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                        {activeFilters.includes(filter.value) && (
+                          <i className="ri-check-line text-sm"></i>
+                        )}
+                      </span>
+                      {filter.label}
+                    </div>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <div className="relative w-full lg:w-auto">
               <i className="ri-search-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
               <input 
                 placeholder="Search orders..."
-                className="pl-12 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
+                className="w-full lg:w-auto pl-12 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -312,7 +369,7 @@ const Orders: React.FC = () => {
         <Dialog open={true} onOpenChange={() => setShowModal(false)}>
           <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editingOrder ? 'Edit Order' : 'Create New Order'}</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-[#1A2A3A]">{editingOrder ? 'Edit Order' : 'Create New Order'}</DialogTitle>
               <DialogDescription>
                 {editingOrder ? 'Update order details' : 'Start a new order for your client'}
               </DialogDescription>

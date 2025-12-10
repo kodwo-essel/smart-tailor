@@ -27,7 +27,12 @@ export default function SignIn() {
       showToast('Login successful! Redirecting...', 'success');
       navigate('/dashboard');
     } catch (err: any) {
-      showToast(err.message || 'Login failed. Please try again.', 'error');
+      if ((err.response?.status === 403 || err.status === 403) && err.message.includes('not verified')) {
+        showToast('Account not verified. Verification code sent to your email.', 'info');
+        navigate('/verify-otp', { state: { email: formData.email, purpose: 'verification' } });
+      } else {
+        showToast(err.message || 'Login failed. Please try again.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -111,7 +116,7 @@ export default function SignIn() {
                 />
                 <span className="text-sm text-[#2F2F2F]">Remember me</span>
               </label>
-              <a href="#" className="text-sm text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors">Forgot password?</a>
+              <Link to="/forgot-password" className="text-sm text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors">Forgot password?</Link>
             </div>
 
             <button

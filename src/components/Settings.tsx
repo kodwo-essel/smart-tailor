@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
-import { authService, userService, User, SubscriptionPlan } from '../services';
+import OTPVerification from './OTPVerification';
+import { authService, userService, uploadService, User, SubscriptionPlan } from '../services';
 import { useToast } from './ToastContainer';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -15,11 +17,13 @@ const Settings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [updatingPlan, setUpdatingPlan] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [months, setMonths] = useState(1);
+  const [months, setMonths] = useState('1');
   const [formData, setFormData] = useState({
     name: '',
     phoneNumber: '',
@@ -52,6 +56,7 @@ const Settings: React.FC = () => {
         businessName: userData.businessName || '',
         businessAddress: userData.businessAddress || ''
       });
+      setProfilePhoto(userData.profileImageUrl || null);
     } catch (error) {
       console.error('Failed to fetch user:', error);
     } finally {
@@ -64,7 +69,20 @@ const Settings: React.FC = () => {
     
     setSaving(true);
     try {
-      await userService.update(user.id, formData);
+      let imageUrl = user.profileImageUrl;
+      
+      if (profilePhoto && profilePhoto !== user.profileImageUrl) {
+        setUploading(true);
+        const fileInput = document.getElementById('profile-photo') as HTMLInputElement;
+        const file = fileInput?.files?.[0];
+        if (file) {
+          imageUrl = await uploadService.uploadFile(file);
+        }
+        setUploading(false);
+      }
+      
+      const updateData = { ...formData, profileImageUrl: imageUrl };
+      await userService.update(user.id, updateData);
       await fetchUser();
       showToast('Profile updated successfully!', 'success');
     } catch (error: any) {
@@ -72,6 +90,7 @@ const Settings: React.FC = () => {
       showToast(error.response?.data?.message || 'Failed to update profile', 'error');
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   };
 
@@ -104,22 +123,49 @@ const Settings: React.FC = () => {
     setShowPlanModal(true);
   };
 
-  const handlePlanChange = async () => {
+  const initiatePlanUpgrade = async () => {
     if (!selectedPlan) return;
     
     setUpdatingPlan(true);
     try {
-      const response = await userService.upgradePlan(selectedPlan.id, months);
-      window.open(response.authorizationUrl, '_blank');
+      await fetch('/api/subscriptions/upgrade/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selectedPlan.id })
+      });
       setShowPlanModal(false);
-      setSelectedPlan(null);
-      showToast('Payment window opened. Complete payment to activate your plan.', 'info');
+      setShowOTPModal(true);
+      showToast('Upgrade OTP sent to your email', 'info');
     } catch (error: any) {
-      console.error('Failed to initiate payment:', error);
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to initiate payment';
-      showToast(errorMessage, 'error');
+      console.error('Failed to initiate upgrade:', error);
+      showToast('Failed to initiate upgrade', 'error');
     } finally {
       setUpdatingPlan(false);
+    }
+  };
+
+  const completePlanUpgrade = async () => {
+    if (!selectedPlan) return;
+    
+    try {
+      const response = await fetch('/api/subscriptions/upgrade/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selectedPlan.id })
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        window.open(data.authorizationUrl, '_blank');
+        setShowOTPModal(false);
+        setSelectedPlan(null);
+        showToast('Payment window opened. Complete payment to activate your plan.', 'info');
+      } else {
+        showToast(data.message || 'Failed to complete upgrade', 'error');
+      }
+    } catch (error: any) {
+      console.error('Failed to complete upgrade:', error);
+      showToast('Failed to complete upgrade', 'error');
     }
   };
 
@@ -162,14 +208,18 @@ const Settings: React.FC = () => {
                 </div>
               ) : activeTab === 'Profile' && (
                 <div className="bg-white border border-gray-200 rounded-xl p-8">
-                  <h2 className="text-base font-bold text-[#1A2A3A] mb-6">
+                  <h2 className="text-lg font-bold text-[#1A2A3A] mb-6">
                     Profile Information
                   </h2>
                   
                   {/* Profile Photo */}
                   <div className="flex items-center space-x-6 mb-6">
                     <div className="relative">
-                      {profilePhoto ? (
+                      {uploading ? (
+                        <div className="w-24 h-24 flex items-center justify-center bg-gray-200 rounded-full">
+                          <i className="ri-loader-4-line animate-spin text-2xl text-gray-400"></i>
+                        </div>
+                      ) : profilePhoto ? (
                         <img 
                           src={profilePhoto} 
                           alt="Profile" 
@@ -271,7 +321,7 @@ const Settings: React.FC = () => {
 
               {activeTab === 'Billing' && user && (
                 <div className="bg-white border border-gray-200 rounded-xl p-8">
-                  <h2 className="text-base font-bold text-[#1A2A3A] mb-2">Subscription Plan</h2>
+                  <h2 className="text-lg font-bold text-[#1A2A3A] mb-2">Subscription Plan</h2>
                   <p className="text-xs text-gray-600 mb-6">Manage your subscription and billing</p>
                   
                   <div className="grid md:grid-cols-3 gap-6">
@@ -341,7 +391,7 @@ const Settings: React.FC = () => {
                 <div className="bg-white border border-gray-200 rounded-xl p-8">
                   <div className="text-center py-8">
                     <i className={`${tabs.find(t => t.key === activeTab)?.icon} text-6xl text-gray-300 mb-4`}></i>
-                    <h3 className="text-base font-bold text-[#1A2A3A] mb-2">
+                    <h3 className="text-lg font-bold text-[#1A2A3A] mb-2">
                       {activeTab} Settings
                     </h3>
                     <p className="text-gray-600">This section is under development.</p>
@@ -360,22 +410,23 @@ const Settings: React.FC = () => {
             <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-6">
               <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
             </div>
-            <h2 className="text-base font-bold text-[#1A2A3A] text-center mb-3">Upgrade Subscription Plan</h2>
+            <h2 className="text-lg font-bold text-[#1A2A3A] text-center mb-3">Upgrade Subscription Plan</h2>
             <p className="text-xs text-gray-600 text-center mb-4">
               You are upgrading to the <span className="font-semibold text-[#1A2A3A]">{selectedPlan.name}</span> plan.
             </p>
             <div className="mb-6">
               <label className="block text-xs font-medium text-[#1A2A3A] mb-2 text-left">Subscription Duration</label>
-              <select
-                value={months}
-                onChange={(e) => setMonths(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1A2A3A]"
-              >
-                <option value={1}>1 Month</option>
-                <option value={3}>3 Months</option>
-                <option value={6}>6 Months</option>
-                <option value={12}>12 Months</option>
-              </select>
+              <Select value={months} onValueChange={setMonths}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Month</SelectItem>
+                  <SelectItem value="3">3 Months</SelectItem>
+                  <SelectItem value="6">6 Months</SelectItem>
+                  <SelectItem value="12">12 Months</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center space-x-3">
               <button 
@@ -389,7 +440,7 @@ const Settings: React.FC = () => {
                 Cancel
               </button>
               <button 
-                onClick={handlePlanChange}
+                onClick={initiatePlanUpgrade}
                 disabled={updatingPlan}
                 className="flex-1 px-4 py-2 bg-[#1A2A3A] text-white text-xs font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
               >
@@ -400,6 +451,23 @@ const Settings: React.FC = () => {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* OTP Verification Modal */}
+      {showOTPModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+            <OTPVerification
+              purpose="upgrade"
+              modal={true}
+              onSuccess={completePlanUpgrade}
+              onCancel={() => {
+                setShowOTPModal(false);
+                setSelectedPlan(null);
+              }}
+            />
           </div>
         </div>
       )}

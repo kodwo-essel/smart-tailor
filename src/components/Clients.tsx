@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
-import { clientService, Client } from '../services';
+import { clientService, uploadService, Client } from '../services';
+import { useToast } from './ToastContainer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/pagination';
 
 const Clients: React.FC = () => {
+  const { showToast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,6 +35,8 @@ const Clients: React.FC = () => {
     notes: ''
   });
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -46,7 +50,7 @@ const Clients: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result as string);
+        setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -84,19 +88,47 @@ const Clients: React.FC = () => {
     setSubmitting(true);
     
     try {
+      let imageUrl = profileImage || (editingClient?.profileImageUrl || null);
+      console.log('Initial imageUrl:', imageUrl);
+      console.log('previewImage exists:', !!previewImage);
+      console.log('profileImage exists:', !!profileImage);
+      
+      if (previewImage && !profileImage) {
+        setUploading(true);
+        const file = fileInputRef.current?.files?.[0];
+        console.log('File to upload:', file);
+        if (file) {
+          imageUrl = await uploadService.uploadFile(file);
+          console.log('Uploaded imageUrl:', imageUrl);
+        }
+        setUploading(false);
+      }
+      
+      const clientData = { 
+        ...newClient, 
+        profileImageUrl: imageUrl
+      };
+      console.log('Final clientData:', clientData);
+      
       if (editingClient) {
-        await clientService.update(editingClient.id, newClient);
+        await clientService.update(editingClient.id, clientData);
+        showToast('Client updated successfully!', 'success');
       } else {
-        await clientService.create(newClient);
+        await clientService.create(clientData);
+        showToast('Client created successfully!', 'success');
       }
       await fetchClients();
       setShowModal(false);
       setEditingClient(null);
       setNewClient({ name: '', phoneNumber: '', email: '', notes: '' });
+      setProfileImage(null);
+      setPreviewImage(null);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save client');
+      const errorMessage = err.response?.data?.message || 'Failed to save client';
+      showToast(errorMessage, 'error');
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
@@ -140,7 +172,7 @@ const Clients: React.FC = () => {
       setDeleteModal(false);
       setDeletingClient(null);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete client');
+      showToast(err.response?.data?.message || 'Failed to delete client', 'error');
     } finally {
       setDeleting(false);
     }
@@ -205,10 +237,14 @@ const Clients: React.FC = () => {
                     <tr key={client.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors relative ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                       <td className="py-3 px-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-bold text-gray-600">
-                              {client.name.charAt(0).toUpperCase()}
-                            </span>
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {client.profileImageUrl ? (
+                              <img src={client.profileImageUrl} alt={client.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-xs font-bold text-gray-600">
+                                {client.name.charAt(0).toUpperCase()}
+                              </span>
+                            )}
                           </div>
                           <a className="text-xs font-medium text-[#1A2A3A] hover:underline cursor-pointer" href={`/clients/${client.id}`}>
                             {client.name}
@@ -313,24 +349,25 @@ const Clients: React.FC = () => {
         <Dialog open={true} onOpenChange={() => setShowModal(false)}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{editingClient ? 'Edit Client' : 'Add New Client'}</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-[#1A2A3A]">{editingClient ? 'Edit Client' : 'Add New Client'}</DialogTitle>
               <DialogDescription>
                 {editingClient ? 'Update client information' : 'Add a new client to your system'}
               </DialogDescription>
             </DialogHeader>
             
             <form onSubmit={handleAddClient} className="space-y-4">
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                  {error}
-                </div>
-              )}
               
               <div className="flex justify-center">
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-                    {profileImage ? (
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden relative">
+                    {uploading ? (
+                      <i className="ri-loader-4-line animate-spin text-xl text-gray-400"></i>
+                    ) : previewImage ? (
+                      <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : profileImage ? (
                       <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : editingClient?.profileImageUrl ? (
+                      <img src={editingClient.profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
                     ) : editingClient ? (
                       <span className="text-lg font-bold text-gray-600">
                         {editingClient.name.charAt(0).toUpperCase()}

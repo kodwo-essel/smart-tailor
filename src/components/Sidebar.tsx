@@ -89,10 +89,14 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
         <div className="p-4 border-t border-gray-200">
           {collapsed ? (
             <div className="flex flex-col items-center space-y-3">
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full">
-                <span className="text-sm font-bold text-gray-700">
-                  {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-                </span>
+              <div className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full overflow-hidden">
+                {user?.profileImageUrl ? (
+                  <img src={user.profileImageUrl} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-bold text-gray-700">
+                    {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                  </span>
+                )}
               </div>
               <button 
                 onClick={() => setShowLogoutModal(true)}
@@ -107,10 +111,14 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
             </div>
           ) : (
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full">
-                <span className="text-sm font-bold text-gray-700">
-                  {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-                </span>
+              <div className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full overflow-hidden">
+                {user?.profileImageUrl ? (
+                  <img src={user.profileImageUrl} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-bold text-gray-700">
+                    {user?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-[#1A2A3A] truncate">{user?.name || 'User'}</p>
