@@ -164,17 +164,17 @@ export default function SignUp() {
               </div>
             </div>
 
-            <div className="flex items-start space-x-2">
+            <div className="flex items-start space-x-3">
               <input
                 id="terms"
                 type="checkbox"
                 required
                 checked={formData.terms}
                 onChange={(e) => setFormData({ ...formData, terms: e.target.checked })}
-                className="w-4 h-4 mt-1 rounded border-2 border-[#E5E5E5] text-[#1A2A3A] focus:ring-0 focus:ring-offset-0"
+                className="w-4 h-4 mt-0.5 rounded border-2 border-[#E5E5E5] text-[#1A2A3A] focus:ring-0 focus:ring-offset-0 flex-shrink-0"
               />
-              <label htmlFor="terms" className="text-sm text-[#2F2F2F] cursor-pointer">
-                I agree to the <a href="#" className="text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors">Terms of Service</a> and <a href="#" className="text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors">Privacy Policy</a>
+              <label htmlFor="terms" className="text-sm text-[#2F2F2F] cursor-pointer leading-relaxed">
+                I agree to the <Link to="/terms" className="text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors underline">Privacy Policy</Link>
               </label>
             </div>
 

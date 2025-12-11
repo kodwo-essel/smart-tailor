@@ -16,6 +16,8 @@ import ErrorPage from './components/ErrorPage';
 import PaymentCallback from './components/PaymentCallback';
 import ForgotPassword from './components/ForgotPassword';
 import OTPVerification from './components/OTPVerification';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
 import { ToastProvider } from './components/ToastContainer';
 
 function App() {
@@ -39,6 +41,8 @@ function App() {
         <Route path="/orders/:id" element={<OrderDetails />} />
         <Route path="/appointments/:id" element={<AppointmentDetails />} />
         <Route path="/payment/callback" element={<PaymentCallback />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="*" element={<ErrorPage />} />
         </Routes>
       </Router>

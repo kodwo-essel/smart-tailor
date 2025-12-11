@@ -19,7 +19,7 @@ const plans = [
   {
     name: 'Pro',
     subtitle: 'For growing tailoring businesses',
-    price: '$29',
+    price: '$9.99',
     period: '/ per month',
     buttonText: 'Start Free Trial',
     buttonStyle: 'bg-[#1A2A3A] text-white hover:bg-[#2F2F2F]',
@@ -37,7 +37,7 @@ const plans = [
   {
     name: 'Premium',
     subtitle: 'For established tailoring studios',
-    price: '$79',
+    price: '$19.99',
     period: '/ per month',
     buttonText: 'Start Free Trial',
     buttonStyle: 'bg-white text-[#1A2A3A] hover:bg-[#D9C7A8]',
