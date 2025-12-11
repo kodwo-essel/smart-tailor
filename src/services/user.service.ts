@@ -40,6 +40,8 @@ class UserService {
   async upgradePlan(planId: string, months: number): Promise<{ reference: string; authorizationUrl: string; amount: number; accessCode: string }> {
     return apiService.post(`/api/users/me/upgrade-plan`, { planId, months });
   }
+
+
 }
 
 export default new UserService();

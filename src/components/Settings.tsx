@@ -24,8 +24,10 @@ const Settings: React.FC = () => {
 
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showRenewalModal, setShowRenewalModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [months, setMonths] = useState('1');
+  const [isRenewal, setIsRenewal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phoneNumber: '',
@@ -122,8 +124,16 @@ const Settings: React.FC = () => {
     }
   };
 
-  const openPlanModal = (plan: SubscriptionPlan) => {
+  const openPlanModal = (plan: SubscriptionPlan, renewal = false) => {
     setSelectedPlan(plan);
+    setIsRenewal(renewal);
+    initiatePlanUpgrade();
+    setShowOTPModal(true);
+  };
+
+  const openRenewalModal = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setIsRenewal(true);
     initiatePlanUpgrade();
     setShowOTPModal(true);
   };
@@ -143,13 +153,19 @@ const Settings: React.FC = () => {
 
   const handleOTPSuccess = () => {
     setShowOTPModal(false);
-    setShowPlanModal(true);
+    if (isRenewal) {
+      setShowRenewalModal(true);
+    } else {
+      setShowPlanModal(true);
+    }
   };
 
   const completePlanUpgrade = async () => {
     setShowPlanModal(false);
+    setShowRenewalModal(false);
     setSelectedPlan(null);
-    showToast('Subscription upgrade completed successfully!', 'success');
+    setIsRenewal(false);
+    showToast(isRenewal ? 'Plan renewal completed successfully!' : 'Subscription upgrade completed successfully!', 'success');
     await fetchUser();
     
     // Update user data in localStorage for Sidebar
@@ -328,38 +344,47 @@ const Settings: React.FC = () => {
                       return (
                         <div 
                           key={plan.id}
-                          className={`rounded-xl p-6 transition-all relative overflow-hidden border-2 border-gray-200 ${
+                          className={`rounded-xl p-6 transition-all relative overflow-hidden border-2 ${
                             isCurrentPlan 
-                              ? 'bg-gradient-to-br from-green-50 to-emerald-50' 
-                              : 'hover:border-gray-300 bg-white'
+                              ? 'border-[#1A2A3A] bg-gradient-to-br from-blue-50 to-slate-50' 
+                              : 'border-gray-200 hover:border-gray-300 bg-white'
                           }`}
                         >
                           {isCurrentPlan && (
                             <div className="absolute top-4 right-4">
-                              <div className="flex items-center space-x-1 px-2 py-1 bg-green-600 rounded-full">
+                              <div className="flex items-center space-x-1 px-2 py-1 bg-[#1A2A3A] rounded-full">
                                 <i className="ri-checkbox-circle-fill text-white text-sm"></i>
                                 <span className="text-xs font-semibold text-white">Active</span>
                               </div>
                             </div>
                           )}
-                          <h3 className={`text-base font-bold mb-2 ${isCurrentPlan ? 'text-green-800' : 'text-[#1A2A3A]'}`}>{plan.name}</h3>
-                          <p className={`text-sm mb-4 ${isCurrentPlan ? 'text-green-700' : 'text-gray-600'}`}>{plan.description}</p>
+                          <h3 className={`text-base font-bold mb-2 ${isCurrentPlan ? 'text-[#1A2A3A]' : 'text-[#1A2A3A]'}`}>{plan.name}</h3>
+                          <p className={`text-sm mb-4 ${isCurrentPlan ? 'text-gray-700' : 'text-gray-600'}`}>{plan.description}</p>
                           
                           {isCurrentPlan && user.subscriptionPlan?.subscriptionEndDate && (
                             <div className="mb-4">
-                              <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-md">
+                              <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-[#1A2A3A] text-xs font-medium rounded-md">
                                 Expires {new Date(user.subscriptionPlan.subscriptionEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                               </span>
                             </div>
                           )}
                           
                           <div className="mb-4">
-                            <div className={`flex items-center text-sm mb-2 ${isCurrentPlan ? 'text-green-700' : 'text-gray-700'}`}>
+                            <div className={`flex items-center text-sm mb-2 ${isCurrentPlan ? 'text-gray-700' : 'text-gray-700'}`}>
                               <i className={`${plan.appointmentsEnabled ? 'ri-checkbox-circle-line text-green-600' : 'ri-close-circle-line text-red-600'} mr-2`}></i>
                               Appointments {plan.appointmentsEnabled ? 'Enabled' : 'Disabled'}
                             </div>
                           </div>
-                          {isCurrentPlan ? null : isLowerPlan ? (
+                          {isCurrentPlan ? (
+                            <div className="space-y-2">
+                              <button 
+                                onClick={() => openRenewalModal(plan)}
+                                className="w-full px-4 py-2 bg-[#1A2A3A] text-white text-xs font-medium rounded-lg hover:bg-[#2F2F2F] transition-colors"
+                              >
+                                Renew Plan
+                              </button>
+                            </div>
+                          ) : isLowerPlan ? (
                             <button 
                               disabled
                               className="w-full px-4 py-2 bg-gray-200 text-gray-500 text-xs font-medium rounded-lg cursor-not-allowed"
@@ -396,6 +421,77 @@ const Settings: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Plan Renewal Modal */}
+      {showRenewalModal && selectedPlan && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div className="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mx-auto mb-6">
+              <i className="ri-refresh-line text-2xl text-[#1A2A3A]"></i>
+            </div>
+            <h2 className="text-lg font-bold text-[#1A2A3A] text-center mb-3">Renew Subscription Plan</h2>
+            <p className="text-xs text-gray-600 text-center mb-4">
+              Add more months to your <span className="font-semibold text-[#1A2A3A]">{selectedPlan.name}</span> plan.
+            </p>
+            <div className="mb-6">
+              <label className="block text-xs font-medium text-[#1A2A3A] mb-2 text-left">Additional Duration</label>
+              <Select value={months} onValueChange={setMonths}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Month</SelectItem>
+                  <SelectItem value="3">3 Months</SelectItem>
+                  <SelectItem value="6">6 Months</SelectItem>
+                  <SelectItem value="12">12 Months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => {
+                  setShowRenewalModal(false);
+                  setSelectedPlan(null);
+                  setIsRenewal(false);
+                }}
+                disabled={updatingPlan}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  setUpdatingPlan(true);
+                  try {
+                    const response = await apiService.post('/api/users/me/upgrade-plan', { 
+                      planId: selectedPlan.id, 
+                      months: parseInt(months) 
+                    });
+                    if (response.authorizationUrl) {
+                      window.open(response.authorizationUrl, '_blank');
+                      showToast('Payment window opened. Complete payment to renew your plan.', 'success');
+                    }
+                    completePlanUpgrade();
+                  } catch (error: any) {
+                    console.error('Failed to complete renewal:', error);
+                    showToast('Failed to complete renewal', 'error');
+                  } finally {
+                    setUpdatingPlan(false);
+                  }
+                }}
+                disabled={updatingPlan}
+                className="flex-1 px-4 py-2 bg-[#1A2A3A] text-white text-xs font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
+              >
+                {updatingPlan ? (
+                  <i className="ri-loader-4-line animate-spin text-lg"></i>
+                ) : (
+                  'Complete Renewal'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Plan Change Confirmation Modal */}
       {showPlanModal && selectedPlan && (
