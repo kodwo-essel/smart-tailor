@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TypewriterText from './TypewriterText';
 import { authService } from '../services';
@@ -9,6 +9,12 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (authService.isAuthenticated()) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -28,7 +34,10 @@ export default function SignIn() {
       navigate('/dashboard');
     } catch (err: any) {
       if ((err.response?.status === 403 || err.status === 403) && err.message.includes('not verified')) {
-        showToast('Account not verified. Verification code sent to your email.', 'info');
+        showToast('Account not verified. Verification code sent to your email.', 'success');
+        navigate('/verify-otp', { state: { email: formData.email, purpose: 'verification' } });
+      } else if (err.response?.status === 422 || err.status === 422) {
+        showToast('Account not activated. Verification code sent to your email.', 'success');
         navigate('/verify-otp', { state: { email: formData.email, purpose: 'verification' } });
       } else {
         showToast(err.message || 'Login failed. Please try again.', 'error');

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import OTPVerification from './OTPVerification';
+import apiService from '../services/api.service';
 
 const ForgotPassword: React.FC = () => {
   const [step, setStep] = useState<'email' | 'otp' | 'password'>('email');
@@ -18,20 +19,10 @@ const ForgotPassword: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/otp/send-password-reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      if (response.ok) {
-        setStep('otp');
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to send reset code');
-      }
-    } catch (error) {
-      setError('Network error. Please try again.');
+      await apiService.post('/api/otp/send-password-reset', { email });
+      setStep('otp');
+    } catch (error: any) {
+      setError(error.message || 'Failed to send reset code');
     } finally {
       setLoading(false);
     }
@@ -48,23 +39,13 @@ const ForgotPassword: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, newPassword })
-      });
-
-      if (response.ok) {
-        setSuccess('Password reset successful! You can now login with your new password.');
-        setTimeout(() => {
-          window.location.href = '/signin';
-        }, 2000);
-      } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to reset password');
-      }
-    } catch (error) {
-      setError('Network error. Please try again.');
+      await apiService.post('/api/auth/reset-password', { email, newPassword });
+      setSuccess('Password reset successful! You can now login with your new password.');
+      setTimeout(() => {
+        window.location.href = '/signin';
+      }, 2000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }

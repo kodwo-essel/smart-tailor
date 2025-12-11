@@ -7,6 +7,7 @@ import OTPVerification from './OTPVerification';
 import { authService, userService, uploadService, User, SubscriptionPlan } from '../services';
 import { useToast } from './ToastContainer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import apiService from '../services/api.service';
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +21,9 @@ const Settings: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [updatingPlan, setUpdatingPlan] = useState(false);
-  const [showPlanModal, setShowPlanModal] = useState(false);
+
   const [showOTPModal, setShowOTPModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [months, setMonths] = useState('1');
   const [formData, setFormData] = useState({
@@ -34,6 +36,8 @@ const Settings: React.FC = () => {
   useEffect(() => {
     fetchUser();
   }, []);
+
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -120,22 +124,15 @@ const Settings: React.FC = () => {
 
   const openPlanModal = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
-    setShowPlanModal(true);
+    initiatePlanUpgrade();
+    setShowOTPModal(true);
   };
 
   const initiatePlanUpgrade = async () => {
-    if (!selectedPlan) return;
-    
     setUpdatingPlan(true);
     try {
-      await fetch('/api/subscriptions/upgrade/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: selectedPlan.id })
-      });
-      setShowPlanModal(false);
-      setShowOTPModal(true);
-      showToast('Upgrade OTP sent to your email', 'info');
+      await apiService.post('/api/subscriptions/upgrade/initiate', {});
+      showToast('Upgrade OTP sent to your email', 'success');
     } catch (error: any) {
       console.error('Failed to initiate upgrade:', error);
       showToast('Failed to initiate upgrade', 'error');
@@ -144,28 +141,25 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleOTPSuccess = () => {
+    setShowOTPModal(false);
+    setShowPlanModal(true);
+  };
+
   const completePlanUpgrade = async () => {
-    if (!selectedPlan) return;
+    setShowPlanModal(false);
+    setSelectedPlan(null);
+    showToast('Subscription upgrade completed successfully!', 'success');
+    await fetchUser();
     
+    // Update user data in localStorage for Sidebar
     try {
-      const response = await fetch('/api/subscriptions/upgrade/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: selectedPlan.id })
-      });
-      const data = await response.json();
-      
-      if (response.ok) {
-        window.open(data.authorizationUrl, '_blank');
-        setShowOTPModal(false);
-        setSelectedPlan(null);
-        showToast('Payment window opened. Complete payment to activate your plan.', 'info');
-      } else {
-        showToast(data.message || 'Failed to complete upgrade', 'error');
-      }
-    } catch (error: any) {
-      console.error('Failed to complete upgrade:', error);
-      showToast('Failed to complete upgrade', 'error');
+      const updatedUser = await userService.getMe();
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userDataUpdated'));
+    } catch (error) {
+      console.error('Failed to update user data:', error);
     }
   };
 
@@ -440,14 +434,32 @@ const Settings: React.FC = () => {
                 Cancel
               </button>
               <button 
-                onClick={initiatePlanUpgrade}
+                onClick={async () => {
+                  setUpdatingPlan(true);
+                  try {
+                    const response = await apiService.post('/api/users/me/upgrade-plan', { 
+                      planId: selectedPlan.id, 
+                      months: parseInt(months) 
+                    });
+                    if (response.authorizationUrl) {
+                      window.open(response.authorizationUrl, '_blank');
+                      showToast('Payment window opened. Complete payment to activate your plan.', 'success');
+                    }
+                    completePlanUpgrade();
+                  } catch (error: any) {
+                    console.error('Failed to complete upgrade:', error);
+                    showToast('Failed to complete upgrade', 'error');
+                  } finally {
+                    setUpdatingPlan(false);
+                  }
+                }}
                 disabled={updatingPlan}
                 className="flex-1 px-4 py-2 bg-[#1A2A3A] text-white text-xs font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center"
               >
                 {updatingPlan ? (
                   <i className="ri-loader-4-line animate-spin text-lg"></i>
                 ) : (
-                  'Proceed'
+                  'Complete Upgrade'
                 )}
               </button>
             </div>
@@ -460,9 +472,10 @@ const Settings: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
             <OTPVerification
-              purpose="upgrade"
+              purpose="verification"
+              email={user?.email}
               modal={true}
-              onSuccess={completePlanUpgrade}
+              onSuccess={handleOTPSuccess}
               onCancel={() => {
                 setShowOTPModal(false);
                 setSelectedPlan(null);

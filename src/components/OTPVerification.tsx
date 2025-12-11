@@ -35,6 +35,12 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
     inputRefs.current[0]?.focus();
   }, []);
 
+  useEffect(() => {
+    if (!modal && authService.isAuthenticated()) {
+      navigate('/dashboard');
+    }
+  }, [modal, navigate]);
+
   const handleChange = (index: number, value: string) => {
     if (value.length > 1) return;
     

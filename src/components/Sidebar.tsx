@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { authService } from '../services';
+import { authService, userService } from '../services';
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -15,9 +15,33 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
   });
 
   useEffect(() => {
-    const userData = authService.getUser();
-    setUser(userData);
+    fetchUserData();
+
+    // Listen for custom events for same-tab updates
+    const handleUserDataUpdate = () => {
+      fetchUserData();
+    };
+
+    window.addEventListener('userDataUpdated', handleUserDataUpdate);
+
+    return () => {
+      window.removeEventListener('userDataUpdated', handleUserDataUpdate);
+    };
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      if (authService.isAuthenticated()) {
+        const userData = await userService.getMe();
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      // Fallback to localStorage data
+      const cachedUser = authService.getUser();
+      setUser(cachedUser);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', collapsed.toString());
