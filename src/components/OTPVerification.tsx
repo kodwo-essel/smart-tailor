@@ -168,6 +168,13 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center text-sm text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors mb-4"
+        >
+          <i className="ri-arrow-left-line mr-2"></i>
+          Back
+        </button>
         <div className="text-center">
           <h2 className="text-lg font-bold text-[#1A2A3A]">Enter Verification Code</h2>
           <p className="mt-2 text-sm text-gray-600">
