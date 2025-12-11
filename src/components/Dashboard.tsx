@@ -152,52 +152,70 @@ const Dashboard: React.FC = () => {
             {/* Revenue Chart */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-xs font-semibold text-[#1A2A3A] mb-4">Revenue Overview</h2>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={revenueTrend?.monthlyData?.map((item: any) => ({
-                  month: item.month.substring(0, 3),
-                  revenue: item.revenue
-                })) || []}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" stroke="#666" style={{ fontSize: '12px' }} />
-                  <YAxis stroke="#666" style={{ fontSize: '12px' }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                  <Line type="monotone" dataKey="revenue" stroke="#1A2A3A" strokeWidth={2} dot={{ fill: '#1A2A3A', r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              {!revenueTrend?.monthlyData || revenueTrend.monthlyData.length === 0 || revenueTrend.monthlyData.every((item: any) => item.revenue === 0) ? (
+                <div className="flex items-center justify-center h-[250px] text-gray-500">
+                  <div className="text-center">
+                    <i className="ri-bar-chart-line text-4xl mb-2"></i>
+                    <p className="text-sm">Not enough data</p>
+                  </div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={revenueTrend.monthlyData.map((item: any) => ({
+                    month: item.month.substring(0, 3),
+                    revenue: item.revenue
+                  }))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" stroke="#666" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#666" style={{ fontSize: '12px' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+                    <Line type="monotone" dataKey="revenue" stroke="#1A2A3A" strokeWidth={2} dot={{ fill: '#1A2A3A', r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
             {/* Orders Status Chart */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-xs font-semibold text-[#1A2A3A] mb-4">Orders by Status</h2>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Pending', value: statistics?.pendingOrdersCount || 0, color: '#eab308' },
-                      { name: 'In Progress', value: statistics?.inProgressOrders || 0, color: '#3b82f6' },
-                      { name: 'Completed', value: statistics?.completedOrders || 0, color: '#22c55e' },
-                      { name: 'Cancelled', value: statistics?.canceledOrders || 0, color: '#ef4444' },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {[
-                      { name: 'Pending', value: statistics?.pendingOrdersCount || 0, color: '#eab308' },
-                      { name: 'In Progress', value: statistics?.inProgressOrders || 0, color: '#3b82f6' },
-                      { name: 'Completed', value: statistics?.completedOrders || 0, color: '#22c55e' },
-                      { name: 'Cancelled', value: statistics?.canceledOrders || 0, color: '#ef4444' },
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                </PieChart>
-              </ResponsiveContainer>
+              {!statistics || (statistics.pendingOrdersCount + statistics.inProgressOrders + statistics.completedOrders + statistics.canceledOrders) === 0 ? (
+                <div className="flex items-center justify-center h-[250px] text-gray-500">
+                  <div className="text-center">
+                    <i className="ri-pie-chart-line text-4xl mb-2"></i>
+                    <p className="text-sm">Not enough data</p>
+                  </div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Pending', value: statistics?.pendingOrdersCount || 0, color: '#eab308' },
+                        { name: 'In Progress', value: statistics?.inProgressOrders || 0, color: '#3b82f6' },
+                        { name: 'Completed', value: statistics?.completedOrders || 0, color: '#22c55e' },
+                        { name: 'Cancelled', value: statistics?.canceledOrders || 0, color: '#ef4444' },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {[
+                        { name: 'Pending', value: statistics?.pendingOrdersCount || 0, color: '#eab308' },
+                        { name: 'In Progress', value: statistics?.inProgressOrders || 0, color: '#3b82f6' },
+                        { name: 'Completed', value: statistics?.completedOrders || 0, color: '#22c55e' },
+                        { name: 'Cancelled', value: statistics?.canceledOrders || 0, color: '#ef4444' },
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
