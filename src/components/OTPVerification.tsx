@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useToast } from './ToastContainer';
 import { authService } from '../services';
 import apiService from '../services/api.service';
+
 
 interface OTPVerificationProps {
   purpose?: string;
@@ -86,8 +86,6 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
     setLoading(true);
     
     try {
-      // Unauthenticated: verification, password-reset (user not logged in)
-      // Authenticated: upgrade (user is logged in)
       const isAuthenticated = authService.isAuthenticated();
       
       if (isAuthenticated) {
@@ -112,7 +110,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
       <div className="p-6">
         <div className="text-center mb-6">
           <h2 className="text-lg font-bold text-[#1A2A3A]">Enter Verification Code</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-[#2F2F2F]">
             We sent a 6-digit code to {email || 'your email'}
           </p>
         </div>
@@ -128,36 +126,43 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
                 value={digit}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-10 h-10 text-center text-sm font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent"
+                className="w-10 h-10 text-center text-sm font-semibold bg-white text-[#1A2A3A] border-2 border-[#E5E5E5] rounded-lg focus:border-[#1A2A3A] focus:outline-none transition-colors"
               />
             ))}
           </div>
 
           <div className="space-y-3">
-            <Button
+            <button
               onClick={verifyOTP}
               disabled={loading}
-              className="w-full"
+              className="w-full px-6 py-3 bg-[#1A2A3A] text-white text-sm font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              style={{ fontFamily: '"Russo One", sans-serif' }}
             >
-              {loading ? 'Verifying...' : 'Verify Code'}
-            </Button>
+              {loading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin text-lg mr-2"></i>
+                  Verifying...
+                </>
+              ) : (
+                'Verify Code'
+              )}
+            </button>
 
             <button
               onClick={resendOTP}
               disabled={loading}
-              className="w-full text-sm text-[#1A2A3A] hover:underline"
+              className="w-full text-sm text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors"
             >
               Didn't receive the code? Resend
             </button>
 
             {onCancel && (
-              <Button
+              <button
                 onClick={onCancel}
-                variant="outline"
-                className="w-full"
+                className="w-full px-6 py-3 bg-white text-[#1A2A3A] text-sm font-medium rounded-lg border-2 border-[#E5E5E5] hover:border-[#1A2A3A] transition-colors"
               >
                 Cancel
-              </Button>
+              </button>
             )}
           </div>
         </div>
@@ -166,59 +171,87 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="text-lg font-bold text-[#1A2A3A]">Enter Verification Code</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            We sent a 6-digit code to {email || 'your email'}
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#F7F6F3] flex">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-8">
+        <div className="w-full max-w-md">
+          <Link to="/" className="flex items-center space-x-3 mb-12">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
+            </div>
+            <span className="text-lg font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>Smart Tailor</span>
+          </Link>
 
-        <div className="space-y-6">
-          <div className="flex justify-center space-x-2">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-lg font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A2A3A] focus:border-transparent"
-              />
-            ))}
+          <div className="mb-10">
+            <h1 className="text-4xl text-[#1A2A3A] mb-3" style={{ fontFamily: '"Russo One", sans-serif' }}>
+              Verify Your Email
+            </h1>
+            <p className="text-base text-[#2F2F2F]">
+              We sent a 6-digit verification code to {email || 'your email'}
+            </p>
           </div>
 
-          <div className="space-y-3">
-            <Button
+          <div className="space-y-6">
+            <div className="flex justify-center space-x-3">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className="w-12 h-12 text-center text-lg font-bold bg-white text-[#1A2A3A] border-2 border-[#E5E5E5] rounded-lg focus:border-[#1A2A3A] focus:outline-none transition-colors"
+                />
+              ))}
+            </div>
+
+            <button
               onClick={verifyOTP}
               disabled={loading}
-              className="w-full"
+              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              style={{ fontFamily: '"Russo One", sans-serif' }}
             >
-              {loading ? 'Verifying...' : 'Verify Code'}
-            </Button>
+              {loading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin text-xl mr-2"></i>
+                  Verifying...
+                </>
+              ) : (
+                'Verify Code'
+              )}
+            </button>
 
             <button
               onClick={resendOTP}
               disabled={loading}
-              className="w-full text-sm text-[#1A2A3A] hover:underline"
+              className="w-full text-sm text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors"
             >
               Didn't receive the code? Resend
             </button>
 
             {onCancel && (
-              <Button
+              <button
                 onClick={onCancel}
-                variant="outline"
-                className="w-full"
+                className="w-full px-6 py-3 bg-white text-[#1A2A3A] text-sm font-medium rounded-lg border-2 border-[#E5E5E5] hover:border-[#1A2A3A] transition-colors mt-4"
               >
                 Cancel
-              </Button>
+              </button>
             )}
           </div>
+
+          <p className="text-center text-sm text-[#2F2F2F] mt-8">
+            Need help? <Link to="/signin" className="text-[#1A2A3A] font-medium hover:text-[#2F2F2F] transition-colors">Back to Sign In</Link>
+          </p>
         </div>
+      </div>
+
+      <div className="hidden lg:block lg:w-1/2 relative">
+        <img 
+          src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNsb3RoZXN8ZW58MHx8MHx8fDA%3D" 
+          alt="Tailoring workspace" 
+          className="w-full h-full object-cover"
+        />
       </div>
     </div>
   );
