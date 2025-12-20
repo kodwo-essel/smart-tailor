@@ -11,7 +11,8 @@ class WebSocketService {
     const token = authService.getToken();
     if (!user?.id || !token || this.connected) return;
 
-    const socket = new SockJS(`http://localhost:8080/ws/notifications?token=${token}`);
+    const wsUrl = import.meta.env.VITE_API_BASE_URL?.replace('http', 'ws') || 'ws://localhost:8080';
+    const socket = new SockJS(`${wsUrl}/ws/notifications?token=${token}`);
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect({}, () => {
