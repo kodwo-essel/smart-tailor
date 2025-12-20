@@ -51,36 +51,38 @@ export default function SignIn() {
     <div className="min-h-screen bg-[#F7F6F3] flex">
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-8">
         <div className="w-full max-w-md">
-          <Link to="/" className="flex items-center space-x-3 mb-12">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
+          <Link to="/" className="flex items-center justify-center mb-12">
+            <div className="w-16 h-16 flex items-center justify-center">
+              <i className="ri-scissors-cut-line text-4xl text-[#1A2A3A]"></i>
             </div>
-            <span className="text-lg font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>Smart Tailor</span>
           </Link>
 
-          <div className="mb-10">
-            <h1 className="text-4xl text-[#1A2A3A] mb-3" style={{ fontFamily: '"Russo One", sans-serif' }}>Welcome Back</h1>
-            <p className="text-base text-[#2F2F2F]">Sign in to continue managing your tailoring business</p>
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold text-[#1A2A3A] mb-2" style={{ fontFamily: '"Russo One", sans-serif' }}>Welcome Back</h1>
+            <p className="text-sm text-[#2F2F2F]">Sign in to continue managing your tailoring business</p>
           </div>
 
 
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#1A2A3A] mb-2">Email Address</label>
+              <label htmlFor="email" className="block text-xs font-medium text-[#1A2A3A] mb-1">Email</label>
               <input
                 id="email"
                 type="email"
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-white text-[#1A2A3A] text-sm border-2 border-[#E5E5E5] rounded-lg focus:border-[#1A2A3A] focus:outline-none transition-colors"
+                className="w-full px-3 py-2 bg-white text-[#1A2A3A] text-sm border border-[#E5E5E5] rounded-full focus:border-[#1A2A3A] focus:outline-none transition-colors"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#1A2A3A] mb-2">Password</label>
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="block text-xs font-medium text-[#1A2A3A]">Password</label>
+                <Link to="/forgot-password" className="text-xs text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors">Forgot your password?</Link>
+              </div>
               <div className="relative">
                 <input
                   id="password"
@@ -88,58 +90,45 @@ export default function SignIn() {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-white text-[#1A2A3A] text-sm border-2 border-[#E5E5E5] rounded-lg focus:border-[#1A2A3A] focus:outline-none transition-colors pr-12"
+                  className="w-full px-3 py-2 bg-white text-[#1A2A3A] text-sm border border-[#E5E5E5] rounded-full focus:border-[#1A2A3A] focus:outline-none transition-colors pr-10"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-[#2F2F2F] hover:text-[#1A2A3A] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-[#2F2F2F] hover:text-[#1A2A3A] transition-colors"
                 >
-                  <i className={`ri-eye${showPassword ? '-off' : ''}-line text-lg`}></i>
+                  <i className={`ri-eye${showPassword ? '-off' : ''}-line text-sm`}></i>
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.rememberMe}
-                  onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                  className="w-4 h-4 rounded border-2 border-[#E5E5E5] text-[#1A2A3A] focus:ring-0 focus:ring-offset-0"
-                />
-                <span className="text-sm text-[#2F2F2F]">Remember me</span>
-              </label>
-              <Link to="/forgot-password" className="text-sm text-[#1A2A3A] hover:text-[#2F2F2F] transition-colors">Forgot password?</Link>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full px-4 py-3 bg-[#1A2A3A] text-white text-sm font-bold rounded-full hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mt-6"
               style={{ fontFamily: '"Russo One", sans-serif' }}
             >
               {loading ? (
                 <>
-                  <i className="ri-loader-4-line animate-spin text-xl mr-2"></i>
+                  <i className="ri-loader-4-line animate-spin text-lg mr-2"></i>
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                'Login'
               )}
             </button>
           </form>
 
-          <p className="text-center text-sm text-[#2F2F2F] mt-8">
-            Don't have an account? <Link to="/signup" className="text-[#1A2A3A] font-medium hover:text-[#2F2F2F] transition-colors">Sign up for free</Link>
+          <p className="text-center text-xs text-[#2F2F2F] mt-6">
+            Don't have an account? <Link to="/signup" className="text-[#1A2A3A] font-medium hover:text-[#2F2F2F] transition-colors">Sign up</Link>
           </p>
         </div>
       </div>
 
       <div className="hidden lg:block lg:w-1/2 relative">
         <img 
-          src="https://images.unsplash.com/photo-1606501126768-b78d4569d3f9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+          src="/images/signin.jpg" 
           alt="Tailor workspace" 
           className="w-full h-full object-cover"
         />

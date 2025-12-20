@@ -126,7 +126,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
                 value={digit}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-10 h-10 text-center text-sm font-semibold bg-white text-[#1A2A3A] border-2 border-[#E5E5E5] rounded-lg focus:border-[#1A2A3A] focus:outline-none transition-colors"
+                className="w-10 h-10 text-center text-sm font-semibold bg-white text-[#1A2A3A] border-2 border-[#E5E5E5] rounded-full focus:border-[#1A2A3A] focus:outline-none transition-colors"
               />
             ))}
           </div>
@@ -135,7 +135,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
             <button
               onClick={verifyOTP}
               disabled={loading}
-              className="w-full px-6 py-3 bg-[#1A2A3A] text-white text-sm font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full px-6 py-3 bg-[#1A2A3A] text-white text-sm font-bold rounded-full hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               style={{ fontFamily: '"Russo One", sans-serif' }}
             >
               {loading ? (
@@ -159,7 +159,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
             {onCancel && (
               <button
                 onClick={onCancel}
-                className="w-full px-6 py-3 bg-white text-[#1A2A3A] text-sm font-medium rounded-lg border-2 border-[#E5E5E5] hover:border-[#1A2A3A] transition-colors"
+                className="w-full px-6 py-3 bg-white text-[#1A2A3A] text-sm font-medium rounded-full border-2 border-[#E5E5E5] hover:border-[#1A2A3A] transition-colors"
               >
                 Cancel
               </button>
@@ -174,15 +174,14 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
     <div className="min-h-screen bg-[#F7F6F3] flex">
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-8">
         <div className="w-full max-w-md">
-          <Link to="/" className="flex items-center space-x-3 mb-12">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <i className="ri-scissors-cut-line text-2xl text-[#1A2A3A]"></i>
+          <Link to="/" className="flex items-center justify-center mb-12">
+            <div className="w-16 h-16 flex items-center justify-center">
+              <i className="ri-scissors-cut-line text-4xl text-[#1A2A3A]"></i>
             </div>
-            <span className="text-lg font-bold text-[#1A2A3A]" style={{ fontFamily: '"Russo One", sans-serif' }}>Smart Tailor</span>
           </Link>
 
-          <div className="mb-10">
-            <h1 className="text-4xl text-[#1A2A3A] mb-3" style={{ fontFamily: '"Russo One", sans-serif' }}>
+          <div className="mb-10 text-center">
+            <h1 className="text-2xl font-bold text-[#1A2A3A] mb-3" style={{ fontFamily: '"Russo One", sans-serif' }}>
               Verify Your Email
             </h1>
             <p className="text-base text-[#2F2F2F]">
@@ -201,7 +200,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12 h-12 text-center text-lg font-bold bg-white text-[#1A2A3A] border-2 border-[#E5E5E5] rounded-lg focus:border-[#1A2A3A] focus:outline-none transition-colors"
+                  className="w-12 h-12 text-center text-lg font-bold bg-white text-[#1A2A3A] border-2 border-[#E5E5E5] rounded-full focus:border-[#1A2A3A] focus:outline-none transition-colors"
                 />
               ))}
             </div>
@@ -209,7 +208,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
             <button
               onClick={verifyOTP}
               disabled={loading}
-              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-lg hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full px-6 py-4 bg-[#1A2A3A] text-white text-base font-bold rounded-full hover:bg-[#2F2F2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               style={{ fontFamily: '"Russo One", sans-serif' }}
             >
               {loading ? (
@@ -233,7 +232,7 @@ const OTPVerification: React.FC<OTPVerificationProps> = ({ purpose: propPurpose,
             {onCancel && (
               <button
                 onClick={onCancel}
-                className="w-full px-6 py-3 bg-white text-[#1A2A3A] text-sm font-medium rounded-lg border-2 border-[#E5E5E5] hover:border-[#1A2A3A] transition-colors mt-4"
+                className="w-full px-6 py-3 bg-white text-[#1A2A3A] text-sm font-medium rounded-full border-2 border-[#E5E5E5] hover:border-[#1A2A3A] transition-colors mt-4"
               >
                 Cancel
               </button>
