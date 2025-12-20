@@ -71,10 +71,10 @@ const Dashboard: React.FC = () => {
   };
 
   const stats = [
-    { icon: 'ri-user-line', value: formatNumber(statistics?.totalClients || 0), label: 'Total Clients', change: statistics ? `${statistics.clientsGrowthPercentage >= 0 ? '+' : ''}${statistics.clientsGrowthPercentage}%` : '+0%', trend: statistics?.clientsTrend || [] },
-    { icon: 'ri-shopping-bag-line', value: formatNumber(statistics?.pendingOrders || 0), label: 'Pending Orders', change: statistics ? `${statistics.pendingOrdersChange >= 0 ? '+' : ''}${statistics.pendingOrdersChange}` : '+0', trend: statistics?.pendingOrdersTrend || [] },
-    { icon: 'ri-checkbox-circle-line', value: formatNumber(statistics?.completedThisMonth || 0), label: 'Completed This Month', change: statistics ? `${statistics.completedGrowthPercentage >= 0 ? '+' : ''}${statistics.completedGrowthPercentage}%` : '+0%', trend: statistics?.completedTrend || [] },
-    { icon: 'ri-money-dollar-circle-line', value: `$${formatNumber(statistics?.revenueThisMonth || 0)}`, label: 'Revenue This Month', change: statistics ? `${statistics.revenueGrowthPercentage >= 0 ? '+' : ''}${statistics.revenueGrowthPercentage}%` : '+0%', trend: statistics?.revenueTrend || [] }
+    { icon: 'ri-user-line', value: statistics ? formatNumber(statistics.totalClients || 0) : 'Not enough data', label: 'Total Clients', change: statistics ? `${statistics.clientsGrowthPercentage >= 0 ? '+' : ''}${statistics.clientsGrowthPercentage}%` : '', trend: statistics?.clientsTrend || [] },
+    { icon: 'ri-shopping-bag-line', value: statistics ? formatNumber(statistics.pendingOrders || 0) : 'Not enough data', label: 'Pending Orders', change: statistics ? `${statistics.pendingOrdersChange >= 0 ? '+' : ''}${statistics.pendingOrdersChange}` : '', trend: statistics?.pendingOrdersTrend || [] },
+    { icon: 'ri-checkbox-circle-line', value: statistics ? formatNumber(statistics.completedThisMonth || 0) : 'Not enough data', label: 'Completed This Month', change: statistics ? `${statistics.completedGrowthPercentage >= 0 ? '+' : ''}${statistics.completedGrowthPercentage}%` : '', trend: statistics?.completedTrend || [] },
+    { icon: 'ri-money-dollar-circle-line', value: statistics ? `$${formatNumber(statistics.revenueThisMonth || 0)}` : 'Not enough data', label: 'Revenue This Month', change: statistics ? `${statistics.revenueGrowthPercentage >= 0 ? '+' : ''}${statistics.revenueGrowthPercentage}%` : '', trend: statistics?.revenueTrend || [] }
   ];
 
   console.log('Stats array:', stats);
@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
                   <div key={index} className="bg-white border border-gray-200 rounded-xl p-3 lg:p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-2">
                       <i className={`${stat.icon} text-lg lg:text-xl text-gray-400`}></i>
-                      <span className={`text-[10px] lg:text-xs font-medium ${isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>
+                      {stat.change && <span className={`text-[10px] lg:text-xs font-medium ${isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>}
                     </div>
                     <div className="flex items-end justify-between gap-2 lg:gap-3">
                       <div>

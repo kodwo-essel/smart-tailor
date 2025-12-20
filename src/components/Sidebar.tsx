@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
     localStorage.setItem('sidebarCollapsed', collapsed.toString());
   }, [collapsed]);
 
-  const appointmentsEnabled = user?.subscriptionPlan?.appointmentsEnabled ?? true;
+  const appointmentsEnabled = user?.subscriptionPlan?.appointmentsEnabled ?? false;
   
   const navItems = [
     { href: '/dashboard', icon: 'ri-dashboard-line', label: 'Dashboard', key: 'dashboard' },
