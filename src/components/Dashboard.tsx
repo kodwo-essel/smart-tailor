@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
                   <div key={index} className="bg-white border border-gray-200 rounded-xl p-3 lg:p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-2">
                       <i className={`${stat.icon} text-lg lg:text-xl text-gray-400`}></i>
-                      {stat.change && <span className={`text-[10px] lg:text-xs font-medium ${isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>}
+                      {stat.change && <span className={`text-[10px] lg:text-xs font-medium ${stat.change === '+0%' || stat.change === '+0' || stat.change === '0%' || stat.change === '0' ? 'text-gray-400' : isNegative ? 'text-red-600' : 'text-green-600'}`}>{stat.change}</span>}
                     </div>
                     <div className="flex items-end justify-between gap-2 lg:gap-3">
                       <div>
@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
                               <Line 
                                 type="monotone" 
                                 dataKey="value" 
-                                stroke={isNegative ? '#ef4444' : '#22c55e'} 
+                                stroke={stat.change === '+0%' || stat.change === '+0' || stat.change === '0%' || stat.change === '0' ? '#9ca3af' : isNegative ? '#ef4444' : '#22c55e'} 
                                 strokeWidth={2} 
                                 dot={false}
                               />

@@ -25,6 +25,7 @@ const Settings: React.FC = () => {
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [showRenewalModal, setShowRenewalModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [months, setMonths] = useState('1');
   const [isRenewal, setIsRenewal] = useState(false);
@@ -127,13 +128,17 @@ const Settings: React.FC = () => {
   const openPlanModal = (plan: SubscriptionPlan, renewal = false) => {
     setSelectedPlan(plan);
     setIsRenewal(renewal);
-    initiatePlanUpgrade();
-    setShowOTPModal(true);
+    setShowConfirmModal(true);
   };
 
   const openRenewalModal = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
     setIsRenewal(true);
+    setShowConfirmModal(true);
+  };
+
+  const confirmUpgrade = () => {
+    setShowConfirmModal(false);
     initiatePlanUpgrade();
     setShowOTPModal(true);
   };
@@ -374,6 +379,32 @@ const Settings: React.FC = () => {
                               <i className={`${plan.appointmentsEnabled ? 'ri-checkbox-circle-line text-green-600' : 'ri-close-circle-line text-red-600'} mr-2`}></i>
                               Appointments {plan.appointmentsEnabled ? 'Enabled' : 'Disabled'}
                             </div>
+                            {plan.name === 'FREE' && (
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Up to 10 clients</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>5 orders per month</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Basic templates</div>
+                              </div>
+                            )}
+                            {plan.name === 'STANDARD' && (
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Up to 100 clients</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Unlimited orders</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>All templates</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>50 cloth photos</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Basic analytics</div>
+                              </div>
+                            )}
+                            {plan.name === 'PREMIUM' && (
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Unlimited clients</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Unlimited orders</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>All templates</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Unlimited photos</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Advanced analytics</div>
+                                <div className="flex items-center"><i className="ri-check-line text-green-600 mr-2"></i>Multi-user access</div>
+                              </div>
+                            )}
                           </div>
                           {isCurrentPlan ? (
                             <div className="space-y-2">
@@ -421,6 +452,44 @@ const Settings: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && selectedPlan && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto mb-6">
+              <i className="ri-question-line text-2xl text-[#1A2A3A]"></i>
+            </div>
+            <h2 className="text-lg font-bold text-[#1A2A3A] text-center mb-3">
+              {isRenewal ? 'Confirm Plan Renewal' : 'Confirm Plan Upgrade'}
+            </h2>
+            <p className="text-xs text-gray-600 text-center mb-6">
+              {isRenewal 
+                ? `Are you sure you want to renew your ${selectedPlan.name} plan? An OTP will be sent to your email.`
+                : `Are you sure you want to upgrade to the ${selectedPlan.name} plan? An OTP will be sent to your email.`
+              }
+            </p>
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedPlan(null);
+                  setIsRenewal(false);
+                }}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmUpgrade}
+                className="flex-1 px-4 py-2 bg-[#1A2A3A] text-white text-xs font-semibold rounded-xl hover:bg-[#2F2F2F] transition-colors"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Plan Renewal Modal */}
       {showRenewalModal && selectedPlan && (
