@@ -19,13 +19,13 @@ import OTPVerification from './components/OTPVerification';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import { ToastProvider } from './components/ToastContainer';
-import { TourProvider } from './components/TourProvider';
+// import { TourProvider } from './components/TourProvider';
 
 function App() {
   return (
     <ToastProvider>
       <Router>
-        <TourProvider>
+        {/* <TourProvider> */}
           <Routes>
         <Route path="/" element={<Navigate to="/signin" replace />} />
         <Route path="/signin" element={<SignIn />} />
@@ -47,7 +47,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="*" element={<ErrorPage />} />
         </Routes>
-        </TourProvider>
+        {/* </TourProvider> */}
       </Router>
     </ToastProvider>
   );

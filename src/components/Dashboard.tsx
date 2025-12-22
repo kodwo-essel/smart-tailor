@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
-import { useTour } from './TourProvider';
+// import { useTour } from './TourProvider';
 import { orderService, appointmentService, userService } from '../services';
 import apiService from '../services/api.service';
 import { API_ENDPOINTS } from '../config/api';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard: React.FC = () => {
-  const { startTour } = useTour();
+  // const { startTour } = useTour();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statistics, setStatistics] = useState<any>(null);
   const [revenueTrend, setRevenueTrend] = useState<any>(null);
@@ -20,11 +20,11 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    const hasSeenTour = localStorage.getItem('hasSeenTour');
-    if (!hasSeenTour) {
-      setTimeout(() => startTour(), 1000);
-    }
-  }, [startTour]);
+    // const hasSeenTour = localStorage.getItem('hasSeenTour');
+    // if (!hasSeenTour) {
+    //   setTimeout(() => startTour(), 1000);
+    // }
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -318,13 +318,13 @@ const Dashboard: React.FC = () => {
       </div>
       
       {/* Manual Tour Button */}
-      <button 
+      {/* <button 
         onClick={startTour}
         className="fixed bottom-24 right-8 w-12 h-12 bg-[#1A2A3A] text-white rounded-full shadow-lg hover:bg-[#2F2F2F] transition-all hover:scale-110 flex items-center justify-center z-[9998]"
         title="Take Tour"
       >
         <i className="ri-guide-line text-xl"></i>
-      </button>
+      </button> */}
     </div>
   );
 };
