@@ -360,6 +360,7 @@ const Orders: React.FC = () => {
           setShowModal(true);
         }}
         className="fixed bottom-8 right-8 w-14 h-14 bg-[#1A2A3A] text-white rounded-full shadow-lg hover:bg-[#2F2F2F] transition-all hover:scale-110 flex items-center justify-center z-40"
+        data-tour="add-order"
       >
         <i className="ri-add-line text-2xl"></i>
       </button>

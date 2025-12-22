@@ -145,7 +145,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-[#1A2A3A] truncate">{user?.name || 'User'}</p>
+                <p className="text-xs font-semibold text-[#1A2A3A] truncate">{user?.name || ''}</p>
                 <p className="text-xs text-[#2F2F2F] truncate">{user?.email || ''}</p>
               </div>
               <button 

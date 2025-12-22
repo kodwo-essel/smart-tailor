@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Loader from './Loader';
+import { useTour } from './TourProvider';
 import { orderService, appointmentService, userService } from '../services';
 import apiService from '../services/api.service';
 import { API_ENDPOINTS } from '../config/api';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard: React.FC = () => {
+  const { startTour } = useTour();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statistics, setStatistics] = useState<any>(null);
   const [revenueTrend, setRevenueTrend] = useState<any>(null);
@@ -18,7 +20,11 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+    const hasSeenTour = localStorage.getItem('hasSeenTour');
+    if (!hasSeenTour) {
+      setTimeout(() => startTour(), 1000);
+    }
+  }, [startTour]);
 
   const fetchData = async () => {
     try {
@@ -103,7 +109,7 @@ const Dashboard: React.FC = () => {
         <Header setSidebarOpen={setSidebarOpen} title="Dashboard" subtitle="Welcome back, John! Here's what's happening today." />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-12">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-12" data-tour="dashboard">
           {/* Stats Cards */}
           {loading ? (
             <div className="flex items-center justify-center py-8 mb-12">
@@ -310,6 +316,15 @@ const Dashboard: React.FC = () => {
 
         </main>
       </div>
+      
+      {/* Manual Tour Button */}
+      <button 
+        onClick={startTour}
+        className="fixed bottom-24 right-8 w-12 h-12 bg-[#1A2A3A] text-white rounded-full shadow-lg hover:bg-[#2F2F2F] transition-all hover:scale-110 flex items-center justify-center z-[9998]"
+        title="Take Tour"
+      >
+        <i className="ri-guide-line text-xl"></i>
+      </button>
     </div>
   );
 };

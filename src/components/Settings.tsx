@@ -208,6 +208,7 @@ const Settings: React.FC = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                   onClick={() => setActiveTab(tab.key)}
+                  data-tour={tab.key === 'Profile' ? 'profile-tab' : tab.key === 'Billing' ? 'billing-tab' : ''}
                 >
                   <i className={`${tab.icon} text-lg`}></i>
                   <span>{tab.label}</span>
